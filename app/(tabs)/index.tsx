@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text } from 'react-native';
-import AlumnosScreen from '@/components/alumnosScreen'; 
+import { View } from 'react-native';
+import AlumnosScreen from '@/components/alumnosScreen';
 
-const IndexScreen = () => {
+const IndexScreen: React.FC = () => {
   return (
     <View style={{ flex: 1 }}>
       <AlumnosScreen />
