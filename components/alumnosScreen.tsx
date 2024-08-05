@@ -61,7 +61,7 @@ const AlumnosScreen: React.FC = () => {
     setAlumnos(updatedAlumnos);
   };
 
-  const filteredAlumnos = alumnos.filter(alumno =>
+  const filteredAlumnos = alumnos.map((alumno, index) => ({ ...alumno, originalIndex: index })).filter(alumno =>
     alumno.nombre.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -118,19 +118,19 @@ const AlumnosScreen: React.FC = () => {
                   <TextInput
                     style={styles.tableRowInput}
                     placeholder="Comentario"
-                    onChangeText={(text) => handleCommentChange(index, text)}
+                    onChangeText={(text) => handleCommentChange(item.originalIndex, text)}
                     value={item.comentario}
                   />
-                  <TouchableOpacity style={styles.tableRowButton} onPress={() => handleAprobadoChange(index)}>
+                  <TouchableOpacity style={styles.tableRowButton} onPress={() => handleAprobadoChange(item.originalIndex)}>
                     <Text style={styles.tableRowButtonText}>{item.aprobado ? 'Aprobado' : 'No Aprobado'}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.tableRowButton} onPress={() => handleEntregadosChange(index)}>
+                  <TouchableOpacity style={styles.tableRowButton} onPress={() => handleEntregadosChange(item.originalIndex)}>
                     <Text style={styles.tableRowButtonText}>{item.entregados ? 'Entregados' : 'No Entregados'}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.tableRowButton} onPress={() => handleComunicacionesChange(index)}>
+                  <TouchableOpacity style={styles.tableRowButton} onPress={() => handleComunicacionesChange(item.originalIndex)}>
                     <Text style={styles.tableRowButtonText}>{item.comunicaciones ? 'Si' : 'No'}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(index)}>
+                  <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item.originalIndex)}>
                     <Text style={styles.deleteButtonText}>Eliminar</Text>
                   </TouchableOpacity>
                 </View>
