@@ -1,38 +1,49 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'; 
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 
-const LoginScreen = () => {
+const Login = () => {
+  let username: string = '';
+  const setUsername = (newUsername: string) => {
+    username = newUsername;
+  };
+
   return (
+    
     <View style={styles.container}>
+      
       <Text style={styles.title}>Login</Text>
       <Text style={styles.subtitle}>Sign in to continue</Text>
 
+      <TextInput
+        style={styles.input}
+        placeholder="Username"
+        value={username}
+        onChangeText={(text) => setUsername(text)}
+      />
+
       <TouchableOpacity style={styles.button}>
         <View style={styles.iconContainer}>
-          <FontAwesome name="facebook" size={20} color="#4CAF50" />
+          <Text style={styles.icon}>facebook</Text>
         </View>
         <Text style={styles.buttonText}>facebook</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button}>
         <View style={styles.iconContainer}>
-          <FontAwesome name="google" size={20} color="#4CAF50" />
+          <Text style={styles.icon}>google</Text>
         </View>
         <Text style={styles.buttonText}>google</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button}>
         <View style={styles.iconContainer}>
-          <FontAwesome name="twitter" size={20} color="#4CAF50" />
+          <Text style={styles.icon}>twitter</Text>
         </View>
         <Text style={styles.buttonText}>twitter</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button}>
         <View style={styles.iconContainer}>
-          <MaterialCommunityIcons name="gmail" size={20} color="#4CAF50" />
+          <Text style={styles.icon}>gmail</Text>
         </View>
         <Text style={styles.buttonText}>gmail</Text>
       </TouchableOpacity>
@@ -61,15 +72,25 @@ const styles = StyleSheet.create({
     color: '#4CAF50',
     marginBottom: 30,
   },
+  input: {
+    height: 40,
+    borderColor: '#4CAF50',
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderRadius: 10,
+    marginBottom: 20,
+    width: '80%',
+  },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 15, // Hace que los botones sean más altos
+    paddingVertical: 15, 
     paddingHorizontal: 10,
     backgroundColor: '#4CAF50',
     borderRadius: 25,
     marginVertical: 10,
-    width: '25%', // Ajusta el ancho de los botones
+    width: '25%', 
     justifyContent: 'center',
     position: 'relative',
   },
@@ -102,4 +123,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+export default Login;

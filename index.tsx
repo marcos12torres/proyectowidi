@@ -1,11 +1,13 @@
 import React from 'react';
 import { View } from 'react-native';
-import AlumnosScreen from '@/components/alumnosScreen';
+
+import App from './app/Navigation';
 
 const IndexScreen: React.FC = () => {
   return (
     <View style={{ flex: 1 }}>
-      <AlumnosScreen />
+      <App></App>
+      
     </View>
   );
 };
