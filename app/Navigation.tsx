@@ -1,5 +1,6 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from "@react-navigation/native";
 
 //screens
@@ -8,6 +9,9 @@ import Login from "./Login";
 
 
 const Tab = createBottomTabNavigator();
+const Drawer = createDrawerNavigator(); 
+
+
 
 function MyTabs() {
   return (
@@ -17,12 +21,22 @@ function MyTabs() {
   );
 }
 
-function App() {
+function MyDrawer() {
+  return (
+    <Drawer.Navigator>
+      <Drawer.Screen name="Tabs" component={MyTabs} />
+    </Drawer.Navigator>
+  );
+} 
+
+
+function Nav() {
   return (
     <NavigationContainer>
-      <MyTabs />
+      <MyDrawer></MyDrawer>
     </NavigationContainer>
   );
 }
 
-export default App;
+
+export default Nav;
