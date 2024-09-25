@@ -5,19 +5,15 @@ import {
   Text,
   TouchableOpacity,
   Image,
-  ScrollView, // Add ScrollView
+  ScrollView,
 } from 'react-native';
 
 const Inicio = () => {
   return (
-    <ScrollView> // Wrap the content inside ScrollView
+    <ScrollView>
       <View style={styles.container}>
-        {/* Imágenes de fondo redondas */}
-        <View style={styles.circleBackgroundTop}></View>
-        <View style={styles.circleBackgroundBottom}></View>
-
-        <View style={styles.header}>
-          <Text style={styles.logo}>BiznesZone</Text>
+      <View style={styles.header}>
+          <Text style={styles.logo}>Seguim</Text>
           <View style={styles.menu}>
             <Text style={styles.menuItem}>Start</Text>
             <Text style={styles.menuItem}>About Us</Text>
@@ -25,6 +21,18 @@ const Inicio = () => {
             <Text style={styles.menuItem}>Contact</Text>
           </View>
         </View>
+        {/* Add the image with rounded borders and blue margin */}
+        <View style={styles.imageContainer}>
+          <Image source={require('./img/libro.jpg')} style={styles.image} />
+        </View>
+
+        {/* Imágenes de fondo redondas */}
+        <View style={styles.circleBackgroundTop}>
+        <Text style={styles.Cajitaparaelcirculo}>Start</Text>
+        </View>
+        <View style={styles.circleBackgroundBottom}></View>
+
+
 
         <View style={styles.hero}>
           <Text style={styles.heroTitle}>We Create Solutions for Your Business</Text>
@@ -133,14 +141,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f8ff',
     position: 'relative',
   },
+  imageContainer: {
+    alignItems: 'center',
+    margin: 20,
+    marginBottom: 40, // Add some space between the image and the rest of the content
+    backgroundColor: '#ADD8E6', // Blue margin
+    borderRadius: 10, // Rounded borders
+    padding: 10,
+  },
+  image: {
+    width: 700, // Medium size
+    height: 500,
+    borderRadius: 10, // Rounded borders
+    alignSelf: 'flex-end',
+  },
   circleBackgroundTop: {
-    position: 'absolute',
-    top: -100,
-    right: -100,
-    width: 300,
-    height: 300,
-    backgroundColor: '#d6eaf8',
+    position: 'relative',
+    top: -500,
+    right: -160,
+    width: 500,
+    height: 400,
+    backgroundColor: '#70C5CE',
     borderRadius: 150,
+    textAlign:'center',
+  },
+  Cajitaparaelcirculo: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    alignItems: 'center',
+    top: 100,
+    
   },
   circleBackgroundBottom: {
     position: 'absolute',
@@ -152,7 +184,7 @@ const styles = StyleSheet.create({
     borderRadius: 150,
   },
   header: {
-    backgroundColor: '#2980B9',
+    backgroundColor: '#11787D',
     padding: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -162,116 +194,118 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
+    textAlign: 'center',
   },
   menu: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   menuItem: {
+    fontSize: 18,
     color: '#fff',
     marginRight: 20,
-    fontWeight: 'bold',
   },
   hero: {
     padding: 20,
-    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
   heroTitle: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#2c3e50',
+    marginBottom: 10,
   },
   heroDescription: {
-    textAlign: 'center',
+    fontSize: 18,
+    color: '#666',
     marginBottom: 20,
-    color: '#34495e',
   },
   button: {
-    backgroundColor: '#3498db',
-    padding: 15,
+    backgroundColor: '#2980B9',
+    padding: 10,
     borderRadius: 5,
   },
   buttonText: {
+    fontSize: 18,
     color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   services: {
     padding: 20,
+    backgroundColor: '#fff',
   },
   sectionTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#2c3e50',
+    marginBottom: 10,
   },
   servicesContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
   },
   serviceCard: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    elevation: 5,
     width: '30%',
+    margin: 10,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
   },
   serviceIcon: {
     width: 50,
     height: 50,
+    borderRadius: 25,
     marginBottom: 10,
-    borderRadius: 25, // Hacer la imagen redonda
   },
   serviceTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
-    color: '#2980B9',
+    marginBottom: 10,
   },
   serviceDescription: {
-    textAlign: 'center',
-    color: '#34495e',
+    fontSize: 16,
+    color: '#666',
   },
   simpleSolutions: {
     padding: 20,
+    backgroundColor: '#fff',
   },
   simpleDescription: {
-    textAlign: 'center',
+    fontSize: 18,
+    color: '#666',
     marginBottom: 20,
-    color: '#34495e',
   },
   steps: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
   },
   step: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    elevation: 5,
     width: '20%',
+    margin: 10,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
   },
   stepNumber: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#2980B9',
   },
   stepTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
-    color: '#2980B9',
+    marginBottom: 10,
   },
   stepDescription: {
-    textAlign: 'center',
-    color: '#34495e',
+    fontSize: 16,
+    color: '#666',
   },
   buttons: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 20,
+    justifyContent: 'space-between',
+    marginBottom: 20,
   },
 });
 
