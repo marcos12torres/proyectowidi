@@ -8,6 +8,9 @@ import {
   ScrollView,
 } from 'react-native';
 
+import { useFonts } from 'expo-font';
+import { Inconsolata_400Regular } from '@expo-google-fonts/inconsolata';
+
 const Inicio = () => {
   return (
     <ScrollView>
@@ -15,118 +18,102 @@ const Inicio = () => {
       <View style={styles.header}>
           <Text style={styles.logo}>Seguim</Text>
           <View style={styles.menu}>
-            <Text style={styles.menuItem}>Start</Text>
+            {/*<Text style={styles.menuItem}>Start</Text>
             <Text style={styles.menuItem}>About Us</Text>
             <Text style={styles.menuItem}>Services</Text>
-            <Text style={styles.menuItem}>Contact</Text>
+            <Text style={styles.menuItem}>Contact</Text>*/}
           </View>
         </View>
         {/* Add the image with rounded borders and blue margin */}
         <View style={styles.imageContainer}>
-          <Image source={require('./img/libro.jpg')} style={styles.image} />
+          <Image source={require('./img/imagen.jpg')} style={styles.image} />
         </View>
 
         {/* Imágenes de fondo redondas */}
         <View style={styles.circleBackgroundTop}>
-        <Text style={styles.Cajitaparaelcirculo}>Start</Text>
+        <Text style={styles.Cajitaparaelcirculo}>En SEGUIM, ofrecemos una solución innovadora para mejorar el seguimiento académico de los estudiantes. Nuestra plataforma está diseñada para que profesores, padres y estudiantes puedan visualizar el progreso y el rendimiento en distintas materias de manera clara y organizada.</Text>
         </View>
         <View style={styles.circleBackgroundBottom}></View>
 
-
-
         <View style={styles.hero}>
-          <Text style={styles.heroTitle}>We Create Solutions for Your Business</Text>
+          <Text style={styles.heroTitle}>Creamos una solucion para llevar a cabo el registro de los estudiantes de una forma digital</Text>
           <Text style={styles.heroDescription}>
-            Class aptent taciti sociosqu ad litora torquent per conubia
-            nostra, per inceptos himenaeos. Mauris in erat justo.
-            Nullam ac urna eu felis dapibus condimentum. Sed sit
-            amet a augue. Sed non mauris vitae erat consequat
-            ipsum, nec sagittis sem nibh id elit, sed non mauris vitae erat.
+            Seguim permite una mejor comunicación entre profesor, estudiante y padres obteniendo una mayor facilidad para visualizar los registro
           </Text>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Get Started</Text>
-          </TouchableOpacity>
         </View>
 
         <View style={styles.services}>
-          <Text style={styles.sectionTitle}>We Provide the Best Services</Text>
+          <Text style={styles.sectionTitle}>PROVEEMOS LOS MEJORES SERVICIO</Text>
           <View style={styles.servicesContainer}>
             <View style={styles.serviceCard}>
-              <Text style={styles.serviceTitle}>SEO/SEM</Text>
+            <Image source={require('./img/imagen.jpg')} style={styles.serviceIcon} />
+              <Text style={styles.serviceTitle}>Usuarios principales</Text>
               <Text style={styles.serviceDescription}>
-                Nullam ac urna eu felis dapibus condimentum sit amet
-                a augue. Sed non mauris vitae erat consequat ipsum,
-                nec sagittis sem nibh id elit, sed non mauris vitae erat.
+              Profesores: Pueden realizar un seguimiento detallado de cada estudiante en las distintas materias que dictan. <br />
+Padres: Pueden revisar el desempeño académico de sus hijos, accediendo a datos de rendimiento, notas y progreso en tiempo real. <br />
+Estudiantes: Les permite ver su propio progreso académico, ayudándoles a identificar áreas donde necesitan mejorar. <br />
               </Text>
             </View>
             <View style={styles.serviceCard}>
-              <Image source={require('./img/libro.jpg')} style={styles.serviceIcon} />
-              <Text style={styles.serviceTitle}>Marketing</Text>
+              <Image source={require('./img/imagen.jpg')} style={styles.serviceIcon} />
+              <Text style={styles.serviceTitle}>Funcionalidades</Text>
               <Text style={styles.serviceDescription}>
-                Nullam ac urna eu felis dapibus condimentum sit amet
-                a augue. Sed non mauris vitae erat consequat ipsum,
-                nec sagittis sem nibh id elit, sed non mauris vitae erat.
+              Interfaz Educativa: El diseño tiene un enfoque visual adecuado para el contexto educativo, incluyendo un encabezado claro, botones de acción, descripciones concisas, e incluso imágenes.
               </Text>
             </View>
             <View style={styles.serviceCard}>
-              <Image source={require('./img/libro.jpg')} style={styles.serviceIcon} />
-              <Text style={styles.serviceTitle}>Viral Campaign</Text>
+              <Image source={require('./img/imagen.jpg')} style={styles.serviceIcon} />
+              <Text style={styles.serviceTitle}>Funcionalidades para estudiates</Text>
               <Text style={styles.serviceDescription}>
-                Nullam ac urna eu felis dapibus condimentum sit amet
-                a augue. Sed non mauris vitae erat consequat ipsum,
-                nec sagittis sem nibh id elit, sed non mauris vitae erat.
+              Acceso a materiales: Sección donde los estudiantes puedan descargar o consultar materiales de estudio, como PDFs, guías, presentaciones o vídeos subidos por los profesores.
+Notificaciones automáticas: Alertas para recordar a los estudiantes las fechas de entrega de tareas o próximas evaluaciones. <br />
+Seguimiento personal: Un panel de control personalizado donde los estudiantes puedan ver sus logros, objetivos alcanzados y tareas pendientes.
               </Text>
             </View>
           </View>
         </View>
 
         <View style={styles.simpleSolutions}>
-          <Text style={styles.sectionTitle}>Simple Solutions!</Text>
+          <Text style={styles.sectionTitle}>Para usar nuestra app debes de....</Text>
           <Text style={styles.simpleDescription}>
-            Aenean sollicitudin, lorem quis bibendum auctor, nisi elit
-            consequat ipsum, nec sagittis sem nibh id elit, sed non
-            mauris vitae erat.
           </Text>
           <View style={styles.steps}>
             <View style={styles.step}>
               <Text style={styles.stepNumber}>1</Text>
-              <Text style={styles.stepTitle}>Contact us</Text>
+              <Text style={styles.stepTitle}>Registrarte</Text>
               <Text style={styles.stepDescription}>
-                Nullam ac urna eu felis dapibus condimentum sit amet a
-                augue.
+                A través del login definir además el tipo de usuario, profesor, alumno, padre, etc
               </Text>
             </View>
             <View style={styles.step}>
               <Text style={styles.stepNumber}>2</Text>
-              <Text style={styles.stepTitle}>Consult</Text>
-              <Text style={styles.stepDescription}>
-                Nullam ac urna eu felis dapibus condimentum sit amet a
-                augue.
+              <Text style={styles.stepTitle}>Dependiendo del tipo de usuario</Text>
+              <Text style={styles.stepDescription}> Tendrás una interfaz distinta. Por ejemplo, si eres profesor, debes cargar tus datos, si eres padre o alumno solo debes esperar las actualizaciones
               </Text>
             </View>
             <View style={styles.step}>
               <Text style={styles.stepNumber}>3</Text>
-              <Text style={styles.stepTitle}>Place order</Text>
+              <Text style={styles.stepTitle}>Visualización</Text>
               <Text style={styles.stepDescription}>
-                Duis sed odio sit amet nibh vulputate cursus a sit
-                amet mauris.
+                Del estado del alumno, sus materias, comentarios, trabajos prácticos, cuaderno de comunicaciones y más
               </Text>
             </View>
             <View style={styles.step}>
               <Text style={styles.stepNumber}>4</Text>
-              <Text style={styles.stepTitle}>Payment</Text>
+              <Text style={styles.stepTitle}>Actualización constante</Text>
               <Text style={styles.stepDescription}>
-                Duis sed odio sit amet nibh vulputate cursus a sit
-                amet mauris.
+              La planilla de seguimiento se actualiza semanalmente por lo tanto, nueva información podrá checkearse
               </Text>
             </View>
           </View>
           <View style={styles.buttons}>
+            {/*
+            aca queremos poner un login
             <TouchableOpacity style={styles.button}>
               <Text style={styles.buttonText}>Get Started</Text>
-            </TouchableOpacity>
+            </TouchableOpacity>*/}
             <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>Read More</Text>
+              <Text style={styles.buttonText}>Acerca de nosotros</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -171,7 +158,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
     alignItems: 'center',
-    top: 100,
+    top: 50,
     
   },
   circleBackgroundBottom: {
