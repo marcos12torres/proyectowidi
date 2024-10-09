@@ -1,13 +1,11 @@
-// Import the functions you need from the SDKs you need
+// Importa las funciones necesarias de Firebase SDK
 import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore"; // Importa Firestore
 import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Tu configuración web de Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyB1f-027EYJPnQDOpvceFudD3Ysl_Wok2c",
+  apiKey: "AIzaSyB1f-02Z7YPJpQDOpvceFudD3Ysl_Wok2c",
   authDomain: "pochoclosapp.firebaseapp.com",
   projectId: "pochoclosapp",
   storageBucket: "pochoclosapp.appspot.com",
@@ -16,6 +14,12 @@ const firebaseConfig = {
   measurementId: "G-YX4GKTX6FV"
 };
 
-// Initialize Firebase
+// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
+
+// Inicializa Firestore
+const db = getFirestore(app); // Agrega esta línea
+
+// Exporta la instancia de Firestore para usarla en otros archivos
+export { db };

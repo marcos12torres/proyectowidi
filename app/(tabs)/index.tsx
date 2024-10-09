@@ -1,6 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
-import AlumnosScreen from '@/components/alumnosScreen';
+import AlumnosScreen from '@/components/alumnoScreen';
+
 
 const IndexScreen: React.FC = () => {
   return (
