@@ -1,11 +1,11 @@
 import React from 'react';
 import { View } from 'react-native';
-import AlumnosScreen from '@/components/alumnosScreen';
-
+//import AlumnoViewScreen from '@/src/Alumnos/AlumnoViewScreen';
+import PadresScreen from '@/src/Padres/PadresViewScreen';
 const IndexScreen: React.FC = () => {
   return (
     <View style={{ flex: 1 }}>
-      <AlumnosScreen />
+      <PadresScreen></PadresScreen>
     </View>
   );
 };
