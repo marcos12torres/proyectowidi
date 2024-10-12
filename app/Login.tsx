@@ -5,27 +5,34 @@ import {
   Text,
   TouchableOpacity,
 } from 'react-native';
+import {
+GoogleSignin,
+GoogleSigninButton,
+statusCodes,
+} from '@react-native-google-signin/google-signin';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [google, setGoogle] = useState('');
+
 
   const handleLogin = () => {
     // Perform login logic with Firebase here
-    console.log('Logging in with:', email, password);
+    console.log('Logging in with:', email, password, google); 
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.circle}>
         <Text style={styles.title}>Iniciar Sesión</Text>
-        <TouchableOpacity style={styles.button} onPress={() => setEmail('')}>
-          <Text style={styles.buttonText}>Email</Text>
+        <TouchableOpacity style={styles.button} onPress={() => setGoogle('')}>
+          <Text style={styles.buttonText}>Google</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={() => setEmail('facebook@example.com')}>
           <Text style={styles.buttonText}>Facebook</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => setPassword('')}>
+        <TouchableOpacity style={styles.button    } onPress={() => setPassword('')}>
           <Text style={styles.buttonText}>Password</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={handleLogin}>

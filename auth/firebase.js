@@ -1,18 +1,29 @@
-// firebase.js
-/*import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAuth,  } from "firebase/auth";
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  statusCodes,
+  } from 'react-native-google-signin';
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyB1f-027EYJPnQDOpvceFudD3Ysl_Wok2c",
-  authDomain: "pochoclosapp.firebaseapp.com",
-  projectId: "pochoclosapp",
-  storageBucket: "pochoclosapp.appspot.com",
-  messagingSenderId: "709855908187",
-  appId: "1:709855908187:web:11dbde2c546b1d56d00a7e",
-  measurementId: "G-YX4GKTX6FV"
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig =  {
+  apiKey: "AIzaSyA79wvtq3yvfOiPUL1RWRbbeXxXNhkYPBk",
+  authDomain: "widyy-e87ff.firebaseapp.com",
+  projectId: "widyy-e87ff",
+  storageBucket: "widyy-e87ff.appspot.com",
+  messagingSenderId: "205345824552",
+  appId: "1:205345824552:web:4a4e4b26af6a7862973a1d"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(appl);//no se si esta bien 
-*/
+export const auth = get(app);
+/*
+const [loggedIn, setloggedIn] = useState(false);
+const [userInfo, setuserInfo] = useState([]);*/
