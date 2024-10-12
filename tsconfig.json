@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "components/alumnosScreen.jsx"  ]
+, "components/alumnosScreen.jsx", "app/firebase.js", "app/index.tsx" ]
 }
