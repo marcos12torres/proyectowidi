@@ -9,7 +9,7 @@ import {
   onAuthStateChanged, 
   signOut 
 } from '@firebase/auth';
-
+import { useNavigation } from '@react-navigation/native';
 import inicio from '../inicio';   
 
 // Configuración de Firebase
@@ -91,6 +91,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({
 // Pantalla para usuario autenticado
 const AuthenticatedScreen: React.FC<AuthenticatedScreenProps> = ({ user, handleLogout }) => (
   <View style={styles.authContainer}>
+
     <Text style={styles.title}>Welcome</Text>
     <Text style={styles.emailText}>{user.email}</Text>
     <Button title="Logout" onPress={handleLogout} color="#e74c3c" />
