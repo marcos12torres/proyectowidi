@@ -2,7 +2,15 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'; 
-
+/*cambio1
+cambiodos
+cambiotres
+cabiocuatro
+cambiocinco
+cambio6
+cambioseven7
+camibio quiero dormir}
+una oveja*/
 const LoginScreen = () => {
   return (
     <View style={styles.container}>
