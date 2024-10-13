@@ -20,7 +20,8 @@ sieteovejas
 ochoovejas
 nueve ovejas ya tengo sueño
 1o ovejas mi mama me dijo q vaya a dormir pipipipipip
-11 ovejas ya son las 2 y 11 d la mañana*/
+11 ovejas ya son las 2 y 11 d la mañana
+13 ovejas avanze un paso y retrocedi una vida*/
 
 const LoginScreen = () => {
   return (
