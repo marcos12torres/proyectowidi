@@ -14,7 +14,10 @@ una oveja
 dosovejas
 tresovejas
 cuatroovejas
-cincoobejas*/
+cincoobejas
+seisovejas
+sieteovejas
+ochoovejas*/
 
 const LoginScreen = () => {
   return (
