@@ -10,7 +10,12 @@ cambiocinco
 cambio6
 cambioseven7
 camibio quiero dormir}
-una oveja*/
+una oveja
+dosovejas
+tresovejas
+cuatroovejas
+cincoobejas*/
+
 const LoginScreen = () => {
   return (
     <View style={styles.container}>
