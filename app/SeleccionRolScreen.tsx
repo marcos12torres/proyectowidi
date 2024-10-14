@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text, Button } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+//import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 
 import Inicio from './inicio';
 import PantallaProfesor from './PantallaProfesor'; // Reemplaza con tu pantalla de profesor
-import  from alumnoScreen './alumnoScreen'; // Reemplaza con tu pantalla de alumno
+import alumnoScreen from './alumnoScreen'; // Reemplaza con tu pantalla de alumno
 
 const Stack = createNativeStackNavigator();
 
