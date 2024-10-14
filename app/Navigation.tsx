@@ -5,6 +5,7 @@ import * as React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
+
 //screens
 import Login from "./Login";
 import Inicio from "./inicio";
@@ -73,6 +74,7 @@ function MyDrawer() {
         <Drawer.Screen name="Planilla de seguimiento1" component={AlumnoViewScreen} />
         <Drawer.Screen name="Planilla de seguimiento2" component={PadresViewScreen} />
         <Drawer.Screen name="Profesor" component={alumnoScreen} />
+        
 
     </Drawer.Navigator>
 
