@@ -7,6 +7,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 //screens
 import Login from "./Login";
+import SeleccionRol from "./SeleccionRol";
 import Inicio from "./inicio";
 import AlumnoViewScreen from "./AlumnosViewScreen";
 import PadresViewScreen from "./PadresViewScreen";
