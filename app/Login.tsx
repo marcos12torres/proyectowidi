@@ -5,7 +5,9 @@ import {
   Text,
   TouchableOpacity,
 } from 'react-native';
-
+/*
+volviendo a las ovejas porque arruine todo oveja 1
+*/
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
