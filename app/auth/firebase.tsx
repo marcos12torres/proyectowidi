@@ -56,6 +56,17 @@ export { auth, provider, firebase };*/
 // Importar funciones necesarias de Firebase
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { 
+  signInWithPopup, 
+  getRedirectResult, 
+  signInWithRedirect, 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from 'firebase/auth';
+
+// Required for side-effects
+import "firebase/firestore";
+
 
 // Configuración de Firebase
 const firebaseConfig = {

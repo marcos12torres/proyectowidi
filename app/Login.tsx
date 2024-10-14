@@ -3,21 +3,31 @@ import {
   StyleSheet,
   View,
   Text,
+  TextInput,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { auth, provider } from './auth/firebase'; // Asegúrate de que el path sea correcto
-
-import { signInWithPopup, getRedirectResult, signInWithRedirect, GoogleAuthProvider } from 'firebase/auth';
-
+import { 
+  signInWithPopup, 
+  getRedirectResult, 
+  signInWithRedirect, 
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from 'firebase/auth';
 
 const Login = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [userInfo, setUserInfo] = useState({});
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLogin, setIsLogin] = useState(true);
 
   // Maneja el inicio de sesión con Google usando Popup
   const handleGoogleLogin = async () => {
     try {
-      const result = await signInWithPopup(auth, provider);  // Para web
+      const result = await signInWithPopup(auth, provider); // Para web
       const credential = GoogleAuthProvider.credentialFromResult(result);
       if (credential) {
         const user = result.user;
@@ -32,54 +42,53 @@ const Login = () => {
     }
   };
 
-  // Maneja el inicio de sesión con Google usando Redirect (usualmente para móvil)
-  const handleGoogleLoginRedirect = async () => {
+  // Maneja el inicio de sesión con correo y contraseña
+  const handleAuthentication = async () => {
     try {
-      await signInWithRedirect(auth, provider);
-    } catch (error) {
-      console.error("Error al login con Google redirect:", error);
-    }
-  };
-
-  // Obtiene el resultado de Redirect
-  const handleGetRedirectResult = async () => {
-    try {
-      const result = await getRedirectResult(auth);
-      if (result) {
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        if (credential) {
-          const user = result.user;
-          setLoggedIn(true);
-          setUserInfo(user);
-          console.log("Login con Google exitoso:", user);
-        } else {
-          console.error("No se pudo obtener la credencial");
-        }
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+        Alert.alert('Éxito', 'Usuario ha iniciado sesión correctamente!');
+      } else {
+        await createUserWithEmailAndPassword(auth, email, password);
+        Alert.alert('Éxito', 'Usuario registrado correctamente!');
       }
     } catch (error) {
-      console.error("Error al obtener resultado de redirect:", error);
+      //Alert.alert('Error', error.message);
     }
   };
-
-  useEffect(() => {
-    handleGetRedirectResult();
-  }, []);
 
   return (
     <View style={styles.container}>
       <View style={styles.circle}>
         <Text style={styles.title}>Iniciar Sesión</Text>
+
+        {/* Formulario para login con correo y contraseña */}
+        <TextInput
+          style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+          placeholder="Email"
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
+        <TextInput
+          style={styles.input}
+          value={password}
+          onChangeText={setPassword}
+          placeholder="Contraseña"
+          secureTextEntry
+        />
+        <TouchableOpacity style={styles.button} onPress={handleAuthentication}>
+          <Text style={styles.buttonText}>{isLogin ? 'Iniciar sesión' : 'Registrarse'}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.toggleText} onPress={() => setIsLogin(!isLogin)}>
+          <Text>{isLogin ? '¿No tienes una cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}</Text>
+        </TouchableOpacity>
+
+        {/* Botón para login con Google */}
         <TouchableOpacity style={styles.button} onPress={handleGoogleLogin}>
           <Text style={styles.buttonText}>Google</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => console.log('Facebook')}>
-          <Text style={styles.buttonText}>Facebook</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => console.log('Password')}>
-          <Text style={styles.buttonText}>Password</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => console.log('Member Login')}>
-          <Text style={styles.buttonText}>Member Login</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -107,6 +116,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 20,
   },
+  input: {
+    width: 250,
+    height: 40,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    marginVertical: 10,
+    paddingHorizontal: 15,
+  },
   button: {
     width: 250,
     height: 40,
@@ -119,7 +136,11 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#11787D', 
+    color: '#11787D',
+  },
+  toggleText: {
+    marginVertical: 10,
+    color: '#fff',
   },
 });
 
