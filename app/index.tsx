@@ -7,7 +7,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MyTabs from './Navigation';
 import Nav from './Navigation';*/
 import Inicio from './inicio';
-import App from './Navigation';
+import App from './NavigationContainer';
 
   /*Login from './Login';*/
 
@@ -19,7 +19,7 @@ const Stack = createNativeStackNavigator();
 
 const IndexScreen: React.FC = () => {
   return (
-    <NavigationContainer>
+    <NavigationContainer independent={true}>
       <Stack.Navigator>
         <Stack.Screen name="Inicio" component={Inicio} />
       </Stack.Navigator>

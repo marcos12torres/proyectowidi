@@ -1,13 +1,14 @@
-
+//import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import * as React from 'react';
-//import {NavigationContainer} from '@react-navigation/native';
+import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 //screens
 import Login from "./Login";
-import SeleccionRol from "./SeleccionRol";
+import SeleccionRolScreen from "./SeleccionRolScreen";
 import Inicio from "./inicio";
 import AlumnoViewScreen from "./AlumnosViewScreen";
 import PadresViewScreen from "./PadresViewScreen";
@@ -22,7 +23,7 @@ const SettingsStack = createNativeStackNavigator();
 // Stack para Home
 function HomeStackScreen() {
   return (
-    <HomeStack.Navigator>
+    <HomeStack.Navigator >
       <HomeStack.Screen
         name="Inicio"
         component={Inicio}
