@@ -74,7 +74,7 @@ function MyDrawer() {
         <Drawer.Screen name="Planilla de seguimiento1" component={AlumnoViewScreen} />
         <Drawer.Screen name="Planilla de seguimiento2" component={PadresViewScreen} />
         <Drawer.Screen name="Profesor" component={alumnoScreen} />
-        
+
 
     </Drawer.Navigator>
 
