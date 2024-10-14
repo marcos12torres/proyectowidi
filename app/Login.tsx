@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 /*
 volviendo a las ovejas porque arruine todo oveja 1
+la calma antes de la tormenta? oveja 2
 */
 const Login = () => {
   const [email, setEmail] = useState('');
