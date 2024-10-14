@@ -13,6 +13,7 @@ import Login from "../src/Login/Login";
 import Inicio from "../src/inicio";
 import AlumnoViewScreen from "../src/Alumnos/AlumnoViewScreen";
 import PadresViewScreen from "../src/Padres/PadresViewScreen";
+import profesor from '../src/Profesor/profesor';
 //import alumnoScreen from "./alumnoScreen";
 
 // Crear navigators
@@ -75,6 +76,9 @@ function MyDrawer() {
         <Drawer.Screen name="Inicio" component={Inicio} />
         <Drawer.Screen name="Planilla de seguimiento1" component={AlumnoViewScreen} />
         <Drawer.Screen name="Planilla de seguimiento2" component={PadresViewScreen} />
+        <Drawer.Screen name="Profesor" component={profesor} />
+        
+        
 
     </Drawer.Navigator>
 
