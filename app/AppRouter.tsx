@@ -1,5 +1,7 @@
 /*Reemplazo de Switch por Routes: Se ha reemplazado todas las instancias de Switch por Routes, que es el componente 
-correspondiente en las versiones más recientes de react-router-dom. */
+correspondiente en las versiones más recientes de react-router-dom. 
+
+Importar Navigate: Se importa el componente Navigate que reemplaza a Redirect en las versiones más recientes de react-router-dom.*/
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
