@@ -118,7 +118,7 @@ function MyDrawer() {
 
 function Nav() {
   return ( 
-    <NavigationContainer>
+    <NavigationContainer independent={true}>
       <MyDrawer></MyDrawer>
     </NavigationContainer>
   );
