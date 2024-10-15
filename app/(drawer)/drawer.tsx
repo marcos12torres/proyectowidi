@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+/*import { View, Text, StyleSheet, Image } from "react-native";
 import React, { useEffect } from "react";
 import { Drawer } from "expo-router/drawer";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
@@ -99,7 +99,7 @@ const CustomDrawerContent = (props: any) => {
           { color: pathname == "/settings" ? "#fff" : "#000" },
         ]}
         style={{ backgroundColor: pathname == "/settings" ? "#333" : "#fff" }}
-        onPress={() => {
+        onPress={() => { //cuando apreto va hacia la ruta de configuraciones 
           router.push("/settings");
         }}
       />
@@ -146,3 +146,4 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   }
 });
+*/
