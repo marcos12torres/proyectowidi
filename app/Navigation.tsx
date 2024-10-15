@@ -134,7 +134,7 @@ const Stack = createNativeStackNavigator();
 
 const MyStack = () => {
   return (
-    <NavigationContainer>
+    <NavigationContainer independent={true}>
       <Stack.Navigator>
         <Stack.Screen
           name="Login"
