@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, CheckBox} from 'react-native';
 
 const PadresScreen = () => {
   const [profesorInfoVisible, setProfesorInfoVisible] = useState(false);
@@ -9,16 +9,23 @@ const PadresScreen = () => {
   };
 
   // Simulamos el estado del cuaderno de comunicaciones (true: tiene, false: no tiene)
-  const cuadernoDeComunicaciones = false; // Puedes cambiar este valor para probar
+  const [cuadernoDeComunicaciones, setCuadernoDeComunicaciones] = useState(false);
+
+  // Simulamos trabajos prácticos entregados
+  const trabajosPracticos = [
+    { nombre: 'Trabajo Práctico 1', entregado: true },
+    { nombre: 'Trabajo Práctico 2', entregado: true },
+    { nombre: 'Trabajo Práctico 3', entregado: false },
+    { nombre: 'Trabajo Práctico 4', entregado: false },
+    { nombre: 'Trabajo Práctico 5', entregado: false },
+  ];
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        {/* Texto centrado */}
         <Text style={styles.title}>Planilla de seguimiento</Text>
         <Text style={styles.subTitle}>Alumno: Juan Pérez</Text>
 
-        {/* Simular la planilla de seguimiento del alumno */}
         <View style={styles.box}>
           <Text style={styles.label}>Comentario</Text>
           <Text style={styles.boxContent}>Comentario del profesor...</Text>
@@ -29,18 +36,29 @@ const PadresScreen = () => {
           <Text style={styles.boxContent}>Aprobado</Text>
         </View>
 
+        {/* Trabajos prácticos entregados con nombres y estado */}
         <View style={styles.box}>
-          <Text style={styles.label}>Trabajos entregados</Text>
-          <Text style={styles.boxContent}>3 de 5 entregados</Text>
+          <Text style={styles.label}>Trabajos Prácticos Entregados</Text>
+          {trabajosPracticos.map((trabajo, index) => (
+            <View key={index} style={styles.trabajoRow}>
+              <Text style={styles.trabajoNombre}>{trabajo.nombre}</Text>
+              <Text style={styles.trabajoEstado}>{trabajo.entregado ? 'Entregado' : 'No entregado'}</Text>
+            </View>
+          ))}
         </View>
 
-        {/* Condicional para cambiar el color del cuaderno de comunicaciones */}
-        <View style={cuadernoDeComunicaciones ? styles.box : styles.boxRed}>
+        {/* Cuaderno de comunicaciones con checkbox */}
+        <View style={styles.box}>
           <Text style={styles.label}>Cuaderno de comunicaciones</Text>
-          <Text style={styles.boxContent}>{cuadernoDeComunicaciones ? 'Si' : 'No'}</Text>
+          <View style={styles.checkboxContainer}>
+            <CheckBox
+              value={cuadernoDeComunicaciones}
+              onValueChange={setCuadernoDeComunicaciones}
+            />
+            <Text style={styles.boxContent}>{cuadernoDeComunicaciones ? 'Sí' : 'No'}</Text>
+          </View>
         </View>
 
-        {/* Botón desplegable para la información del profesor */}
         <TouchableOpacity style={styles.profesorButton} onPress={toggleProfesorInfo}>
           <Text style={styles.profesorButtonText}>Información del profesor</Text>
         </TouchableOpacity>
@@ -84,12 +102,6 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 15,
   },
-  boxRed: {
-    backgroundColor: '#FF6347', // Caja roja si no tiene cuaderno
-    borderRadius: 10,
-    padding: 20,
-    marginBottom: 15,
-  },
   label: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -98,6 +110,22 @@ const styles = StyleSheet.create({
   boxContent: {
     fontSize: 16,
     color: '#000',
+  },
+  trabajoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 5,
+  },
+  trabajoNombre: {
+    fontSize: 16,
+  },
+  trabajoEstado: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   profesorButton: {
     backgroundColor: '#7FFFD4',
