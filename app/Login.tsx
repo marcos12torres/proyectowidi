@@ -18,20 +18,13 @@ import {
 } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
 
-
 const Login = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [userInfo, setUserInfo] = useState({});
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
-  const nav = useNavigation()
-  const asd = createContext
-  /*componenete general 
-  como crear un componente de contexto en react para manejar la autenticacion
-  definir intercface 
-  */
-
+  const nav = useNavigation();
 
   // Maneja el inicio de sesión con Google usando Popup
   const handleGoogleLogin = async () => {
@@ -43,6 +36,9 @@ const Login = () => {
         setLoggedIn(true);
         setUserInfo(user);
         console.log("Login con Google exitoso:", user);
+        //@ts-ignore
+        nav.navigate('Inicio'); /* después de un inicio de sesión o registro exitoso, 
+        el usuario será redirigido a la pantalla de "Inicio".*/
       } else {
         console.error("No se pudo obtener la credencial");
       }
@@ -57,21 +53,31 @@ const Login = () => {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
         Alert.alert('Éxito', 'Usuario ha iniciado sesión correctamente!');
+        setLoggedIn(true);
         //@ts-ignore
-        nav.navigate('Inicio');
+        nav.navigate('Inicio'); // Navegar a la pantalla de Inicio después de iniciar sesión
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
         Alert.alert('Éxito', 'Usuario registrado correctamente!');
+        setLoggedIn(true);
+        //@ts-ignore
+        nav.navigate('Inicio'); // Navegar a la pantalla de Inicio después del registro
       }
     } catch (error) {
-      //Alert.alert('Error', error.message);
+      //@ts-ignore
+      Alert.alert('Error', error.message); //Alert para manejar errores en caso de problemas con el inicio de sesión o registro.
     }
+  };
+
+  // Alternar entre inicio de sesión y registro
+  const toggleAuthMode = () => {
+    setIsLogin(!isLogin);
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.circle}>
-        <Text style={styles.title}>Iniciar Sesión</Text>
+        <Text style={styles.title}>{isLogin ? 'Iniciar Sesión' : 'Registrarse'}</Text>
 
         {/* Formulario para login con correo y contraseña */}
         <TextInput
@@ -93,13 +99,13 @@ const Login = () => {
           <Text style={styles.buttonText}>{isLogin ? 'Iniciar sesión' : 'Registrarse'}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.toggleText} onPress={() => setIsLogin(!isLogin)}>
-          <Text>{isLogin ? '¿No tienes una cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}</Text>
+        <TouchableOpacity style={styles.toggleText} onPress={toggleAuthMode}>
+          <Text style={styles.toggleText}>{isLogin ? '¿No tienes una cuenta? Regístrate' : '¿Ya tienes una cuenta? Inicia sesión'}</Text>
         </TouchableOpacity>
 
-        {/* Botón para login con Google */}
-        <TouchableOpacity style={styles.button} onPress={handleGoogleLogin}>
-          <Text style={styles.buttonText}>Google</Text>
+        {/* Botón de Google */}
+        <TouchableOpacity style={styles.buttonGoogle} onPress={handleGoogleLogin}>
+          <Text style={styles.buttonText}>Iniciar sesión con Google</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -109,49 +115,54 @@ const Login = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#70C5CE',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f8ff',
   },
   circle: {
-    width: 450,
-    height: 450,
-    borderRadius: 300,
-    backgroundColor: '#11787D',
+    width: '80%',
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 20,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
     marginBottom: 20,
+    fontWeight: 'bold',
   },
   input: {
-    width: 250,
-    height: 40,
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    marginVertical: 10,
-    paddingHorizontal: 15,
+    width: '100%',
+    padding: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
   },
   button: {
-    width: 250,
-    height: 40,
-    backgroundColor: '#fff',
-    borderRadius: 20,
+    width: '100%',
+    padding: 15,
+    backgroundColor: '#2980B9',
+    borderRadius: 10,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 10,
+    marginTop: 10,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#11787D',
+    color: '#fff',
+    fontSize: 18,
   },
   toggleText: {
-    marginVertical: 10,
-    color: '#fff',
+    marginTop: 20,
+    color: '#2980B9',
+    fontSize: 16,
+  },
+  buttonGoogle: {
+    width: '100%',
+    padding: 15,
+    backgroundColor: '#DB4437',
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
   },
 });
 
