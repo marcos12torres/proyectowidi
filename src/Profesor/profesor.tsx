@@ -1,150 +1,123 @@
-import React, { useState } from 'react'; 
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, CheckBox } from 'react-native';
-import { firestore } from '@/firebase'; // Asegúrate de que la ruta sea correcta
-import { collection, doc, setDoc } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { firestore } from '@/firebase'; // Asegúrate de importar firestore correctamente
+import { collection, addDoc, getDocs, updateDoc, doc } from 'firebase/firestore';
 
-const PadresScreen = () => {
-  const [comentario, setComentario] = useState('');
-  const [estadoAprobado, setEstadoAprobado] = useState(false);
-  const [cuadernoDeComunicaciones, setCuadernoDeComunicaciones] = useState(false);
-  const [trabajosPracticos, setTrabajosPracticos] = useState([
-    { nombre: 'Trabajo Práctico 1', entregado: false },
-    { nombre: 'Trabajo Práctico 2', entregado: false },
-    { nombre: 'Trabajo Práctico 3', entregado: false },
-  ]);
+// Define las interfaces
+interface TrabajoPractico {
+  nombre: string; // Nombre del trabajo práctico
+  entregado: boolean; // Estado de entrega
+}
 
-  const guardarDatos = async () => {
-    try {
-      const alumnoRef = doc(collection(firestore, 'alumnos'), 'ID_DEL_ALUMNO'); // Cambia esto por el ID del alumno que deseas actualizar
-      await setDoc(alumnoRef, {
-        comentario,
-        estadoAprobado,
-        cuadernoDeComunicaciones,
-        trabajosPracticos
+interface Alumno {
+  id: string; // Identificador único del alumno
+  nombre: string; // Nombre del alumno
+  estado: string; // Estado del alumno (aprobado, desaprobado, etc.)
+  comentarios: string; // Comentarios sobre el alumno
+  trabajosPracticos: TrabajoPractico[]; // Lista de trabajos prácticos
+}
+
+interface Curso {
+  id: string; // Identificador único del curso
+  nombre: string; // Nombre del curso
+  alumnos: Alumno[]; // Lista de alumnos en el curso
+}
+
+const ProfesorScreen: React.FC = () => {
+  const [cursos, setCursos] = useState<Curso[]>([]); // Estado para los cursos
+
+  // Función para cargar cursos desde Firestore
+  const loadCursos = async () => {
+    const cursosCollection = collection(firestore, 'cursos');
+    const cursosSnapshot = await getDocs(cursosCollection);
+    const cursosData = cursosSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...(doc.data() as Omit<Curso, 'id'>), // Asegúrate de que la estructura coincida
+    }));
+    setCursos(cursosData);
+  };
+
+  // Llama a la función de carga en el efecto
+  useEffect(() => {
+    loadCursos();
+  }, []);
+
+  // Función para agregar un alumno a un curso
+  const agregarAlumno = async (cursoId: string, nuevoAlumno: Alumno) => {
+    const curso = cursos.find((curso) => curso.id === cursoId);
+    if (curso) {
+      // Agrega el nuevo alumno localmente
+      curso.alumnos.push(nuevoAlumno);
+
+      // Actualiza el curso en Firestore
+      const cursoRef = doc(firestore, 'cursos', cursoId);
+      await updateDoc(cursoRef, {
+        alumnos: curso.alumnos
       });
-      alert('Datos guardados correctamente');
-    } catch (error) {
-      console.error('Error al guardar los datos: ', error);
-      alert('Error al guardar los datos');
-    }
+      
+      // Actualiza el estado local
+      setCursos([...cursos]);
+    }  
+  };
+
+  // Estilos en línea
+  const styles = {
+    container: {
+      padding: '20px',
+    },
+    title: {
+      fontSize: '24px',
+      color: '#333',
+    },
+    courseList: {
+      listStyleType: 'none',
+      padding: '0',
+    },
+    courseItem: {
+      margin: '10px 0',
+      padding: '10px',
+      border: '1px solid #ccc',
+      borderRadius: '5px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    addButton: {
+      backgroundColor: '#28a745',
+      color: 'white',
+      border: 'none',
+      padding: '5px 10px',
+      borderRadius: '5px',
+      cursor: 'pointer',
+    },
+    addButtonHover: {
+      backgroundColor: '#218838',
+    },
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Planilla de seguimiento</Text>
-        <Text style={styles.subTitle}>Alumno: Juan Pérez</Text>
-
-        <View style={styles.box}>
-          <Text style={styles.label}>Comentario</Text>
-          <TextInput
-            style={styles.input}
-            value={comentario}
-            onChangeText={setComentario}
-          />
-        </View>
-
-        <View style={styles.box}>
-          <Text style={styles.label}>Estado</Text>
-          <CheckBox
-            value={estadoAprobado}
-            onValueChange={setEstadoAprobado}
-          />
-          <Text>{estadoAprobado ? 'Aprobado' : 'No Aprobado'}</Text>
-        </View>
-
-        <View style={styles.box}>
-          <Text style={styles.label}>Cuaderno de comunicaciones</Text>
-          <CheckBox
-            value={cuadernoDeComunicaciones}
-            onValueChange={setCuadernoDeComunicaciones}
-          />
-          <Text>{cuadernoDeComunicaciones ? 'Sí' : 'No'}</Text>
-        </View>
-
-        {/* Trabajos prácticos */}
-        <View style={styles.box}>
-          <Text style={styles.label}>Trabajos Prácticos</Text>
-          {trabajosPracticos.map((trabajo, index) => (
-            <View key={index} style={styles.trabajoRow}>
-              <Text>{trabajo.nombre}</Text>
-              <CheckBox
-                value={trabajo.entregado}
-                onValueChange={() => {
-                  const nuevosTrabajos = [...trabajosPracticos];
-                  nuevosTrabajos[index].entregado = !nuevosTrabajos[index].entregado;
-                  setTrabajosPracticos(nuevosTrabajos);
-                }}
-              />
-              <Text>{trabajo.entregado ? 'Entregado' : 'No entregado'}</Text>
-            </View>
-          ))}
-        </View>
-
-        <TouchableOpacity style={styles.button} onPress={guardarDatos}>
-          <Text style={styles.buttonText}>Guardar Datos</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+    <div style={styles.container}>
+      <h1 style={styles.title}>Lista de Cursos</h1>
+      <ul style={styles.courseList}>
+        {cursos.map(curso => (
+          <li key={curso.id} style={styles.courseItem}>
+            {curso.nombre}
+            <button
+              style={styles.addButton}
+              onClick={() => agregarAlumno(curso.id, { 
+                id: 'nuevo', 
+                nombre: 'Nuevo Alumno', 
+                estado: 'en curso', 
+                comentarios: '', 
+                trabajosPracticos: [] 
+              })}
+            >
+              Agregar Alumno
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 };
 
-const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    paddingBottom: 20,
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#F5F5F5',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  subTitle: {
-    fontSize: 18,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  box: {
-    backgroundColor: '#E0FFFF',
-    borderRadius: 10,
-    padding: 20,
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingLeft: 8,
-  },
-  trabajoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  button: {
-    backgroundColor: '#7FFFD4',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-});
-
-export default PadresScreen;
+export default ProfesorScreen;
