@@ -1,109 +1,140 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, CheckBox} from 'react-native';
 
-interface Alumno {
-  nombre: string;
-  comentario: string;
-  aprobado: boolean;
-  entregados: boolean;
-  comunicaciones: boolean;
-}
+const AlumnoScreen = () => {
 
-const AlumnoViewScreen: React.FC = () => {
-  const [alumno, setAlumno] = useState<Alumno>({
-    nombre: 'Pepito Juarez',
-    comentario: 'Buen trabajo en general, pero puede mejorar en matemáticas.',
-    aprobado: true, 
-    entregados: true,
-    comunicaciones: false,
-  });
+  // Simulamos el estado del cuaderno de comunicaciones (true: tiene, false: no tiene)
+  const [cuadernoDeComunicaciones, setCuadernoDeComunicaciones] = useState(false);
+
+  // Simulamos trabajos prácticos entregados
+  const trabajosPracticos = [
+    { nombre: 'Trabajo Práctico 1', entregado: true },
+    { nombre: 'Trabajo Práctico 2', entregado: true },
+    { nombre: 'Trabajo Práctico 3', entregado: false },
+    { nombre: 'Trabajo Práctico 4', entregado: false },
+    { nombre: 'Trabajo Práctico 5', entregado: false },
+  ];
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{alumno.nombre}</Text>
-      </View>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Planilla de seguimiento</Text>
+        <Text style={styles.subTitle}>Alumno: Juan Pérez</Text>
 
-      <View style={styles.content}>
-        {/* Comentario */}
         <View style={styles.box}>
-          <Text style={styles.label}>Comentario:</Text>
-          <Text style={styles.value}>{alumno.comentario}</Text>
+          <Text style={styles.label}>Comentario</Text>
+          <Text style={styles.boxContent}>Comentario del profesor...</Text>
         </View>
 
-        {/* Estado */}
         <View style={styles.box}>
-          <Text style={styles.label}>Estado:</Text>
-          <Text style={styles.value}>{alumno.aprobado ? 'Aprobado' : 'No Aprobado'}</Text>
+          <Text style={styles.label}>Estado</Text>
+          <Text style={styles.boxContent}>Aprobado</Text>
         </View>
 
-        {/* Trabajos Entregados */}
+        {/* Trabajos prácticos entregados con nombres y estado */}
         <View style={styles.box}>
-          <Text style={styles.label}>Trabajos Entregados:</Text>
-          <Text style={styles.value}>{alumno.entregados ? 'Entregados' : 'No Entregados'}</Text>
+          <Text style={styles.label}>Trabajos Prácticos Entregados</Text>
+          {trabajosPracticos.map((trabajo, index) => (
+            <View key={index} style={styles.trabajoRow}>
+              <Text style={styles.trabajoNombre}>{trabajo.nombre}</Text>
+              <Text style={styles.trabajoEstado}>{trabajo.entregado ? 'Entregado' : 'No entregado'}</Text>
+            </View>
+          ))}
         </View>
 
-        {/* Cuaderno de Comunicaciones */}
-        <View style={[
-          styles.box,
-          { backgroundColor: alumno.comunicaciones ? '#B2DFEE' : '#f44336' }
-        ]}>
-          <Text style={styles.label}>Cuaderno de Comunicaciones:</Text>
-          <Text style={styles.value}>{alumno.comunicaciones ? 'Sí' : 'No'}</Text>
+        {/* Cuaderno de comunicaciones con checkbox */}
+        <View style={styles.box}>
+          <Text style={styles.label}>Cuaderno de comunicaciones</Text>
+          <View style={styles.checkboxContainer}>
+            <CheckBox
+              value={cuadernoDeComunicaciones}
+              onValueChange={setCuadernoDeComunicaciones}
+            />
+            <Text style={styles.boxContent}>{cuadernoDeComunicaciones ? 'Sí' : 'No'}</Text>
+          </View>
         </View>
+
       </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  header: {
-    backgroundColor: '#7fffd4',
     padding: 20,
-    borderRadius: 20,
-    marginBottom: 20,
-    elevation: 4,
+    backgroundColor: '#F5F5F5',
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: 'black',
     textAlign: 'center',
+    marginBottom: 10,
   },
   subTitle: {
-    fontSize: 22,
-    color: 'black',
+    fontSize: 18,
     textAlign: 'center',
-    marginTop: 10,
-  },
-  content: {
-    flexDirection: 'column',
-    justifyContent: 'space-between',
+    marginBottom: 20,
   },
   box: {
-    backgroundColor: '#fff',
-    padding: 15,
+    backgroundColor: '#E0FFFF',
     borderRadius: 10,
-    marginVertical: 10,
-    elevation: 3,
-    flexDirection: 'column',
+    padding: 20,
+    marginBottom: 15,
   },
   label: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  boxContent: {
+    fontSize: 16,
     color: '#000',
+  },
+  trabajoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 5,
   },
-  value: {
-    fontSize: 18,
-    color: '#333',
+  trabajoNombre: {
+    fontSize: 16,
+  },
+  trabajoEstado: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  profesorButton: {
+    backgroundColor: '#7FFFD4',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  profesorButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  profesorInfoBox: {
+    backgroundColor: '#E0FFFF',
+    borderRadius: 10,
+    padding: 20,
+    marginTop: 10,
+  },
+  profesorText: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#000',
+    marginBottom: 10,
   },
 });
 
-export default AlumnoViewScreen;
+export default AlumnoScreen;

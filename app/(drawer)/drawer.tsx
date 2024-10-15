@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+/*import { View, Text, StyleSheet, Image } from "react-native";
 import React, { useEffect } from "react";
 import { Drawer } from "expo-router/drawer";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
@@ -146,3 +146,4 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   }
 });
+*/

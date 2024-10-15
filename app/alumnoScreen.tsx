@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ScrollView } from 'react-native';
+import { auth, provider } from '../app/auth/firebase'; // Importa la configuración de Firebase
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
+
+// Initialize Firebase Firestore
+const db = getFirestore();
 
 interface Alumno {
   nombre: string;
@@ -37,6 +42,9 @@ const AlumnosScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showMateriasMenu, setShowMateriasMenu] = useState<boolean>(false);
   const [showCursosMenu, setShowCursosMenu] = useState<boolean>(false);
+
+  const [cursoToAdd, setCursoToAdd] = useState('');
+  const [alumnoToAdd, setAlumnoToAdd] = useState('');
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);
@@ -85,7 +93,7 @@ const AlumnosScreen: React.FC = () => {
       default:
         return [];
     }
-  };
+ };
 
   const setCurrentAlumnos = (updatedAlumnos: Alumno[]) => {
     switch (selectedCurso) {
@@ -123,6 +131,27 @@ const AlumnosScreen: React.FC = () => {
     setSearchQuery('');  // Limpiar búsqueda al cambiar de curso
   };
 
+  const handleAddCurso = async () => {
+    try {
+      const cursoRef = collection(db, 'cursos');
+      await addDoc(cursoRef, { nombre: cursoToAdd });
+      console.log('Curso added with ID: ${cursoToAdd}');
+    } catch (error) {
+      console.error('Error adding curso: ${error}');
+    }
+  };
+
+  const handleAddAlumno = async () => {
+    try {
+      const cursoId = selectedCurso; // Get the selected curso ID
+      const alumnoRef = collection(db, 'cursos/${cursoId}/alumnos');
+      await addDoc(alumnoRef, { nombre: alumnoToAdd });
+      console.log('Alumno added to curso ${cursoId} with ID: ${alumnoToAdd}');
+    } catch (error) {
+      console.error('Error adding alumno to curso ${cursoId}: ${error}');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -145,7 +174,7 @@ const AlumnosScreen: React.FC = () => {
       </View>
       <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={styles.content}>
         <View style={styles.contentWrapper}>
-        <Text style={styles.sectionTitle}>{'${selectedCurso}/alumnos'}</Text>
+          <Text style={styles.sectionTitle}>{` ${selectedCurso}/alumnos`}</Text>
           <View style={styles.searchContainer}>
             <TextInput
               style={styles.searchInput}
@@ -217,6 +246,27 @@ const AlumnosScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
       )}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={handleAddCurso}>
+          <Text style={styles.buttonText}>Add Curso</Text>
+        </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Curso name"
+          value={cursoToAdd}
+          onChangeText={(text) => setCursoToAdd(text)}
+        />
+
+        <TouchableOpacity style={styles.button} onPress={handleAddAlumno}>
+          <Text style={styles.buttonText}>Add Alumno</Text>
+        </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Alumno name"
+          value={alumnoToAdd}
+          onChangeText={(text) => setAlumnoToAdd(text)}
+        />
+      </View>
     </View>
   );
 };
@@ -402,7 +452,29 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     color: '#000',
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  button: {
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 5,
+    marginRight: 10,
+  },
 });
-
 
 export default AlumnosScreen;
