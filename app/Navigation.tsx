@@ -81,6 +81,8 @@ function MyDrawer() {
   );
 }
 
+
+
 // Aplicación principal con Drawer y Tabs
 export default function App() {
   return (
