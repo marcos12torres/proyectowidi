@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext } from 'react';
 import {
   StyleSheet,
   View,
@@ -8,14 +8,16 @@ import {
   Alert,
 } from 'react-native';
 import { auth, provider } from './auth/firebase'; // Asegúrate de que el path sea correcto
-import { 
-  signInWithPopup, 
-  getRedirectResult, 
-  signInWithRedirect, 
+import {
+  signInWithPopup,
+  getRedirectResult,
+  signInWithRedirect,
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
 } from 'firebase/auth';
+import { useNavigation } from '@react-navigation/native';
+
 
 const Login = () => {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -23,6 +25,13 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
+  const nav = useNavigation()
+  const asd = createContext
+  /*componenete general 
+  como crear un componente de contexto en react para manejar la autenticacion
+  definir intercface 
+  */
+
 
   // Maneja el inicio de sesión con Google usando Popup
   const handleGoogleLogin = async () => {
@@ -48,6 +57,8 @@ const Login = () => {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
         Alert.alert('Éxito', 'Usuario ha iniciado sesión correctamente!');
+        //@ts-ignore
+        nav.navigate('Inicio');
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
         Alert.alert('Éxito', 'Usuario registrado correctamente!');
@@ -98,7 +109,7 @@ const Login = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#70C5CE', 
+    backgroundColor: '#70C5CE',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -106,7 +117,7 @@ const styles = StyleSheet.create({
     width: 450,
     height: 450,
     borderRadius: 300,
-    backgroundColor: '#11787D', 
+    backgroundColor: '#11787D',
     alignItems: 'center',
     justifyContent: 'center',
   },
