@@ -6,7 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 /*import App from './Navigation';
 import MyTabs from './Navigation';
 import Nav from './Navigation';*/
-import inicio from '../src/inicio';
+import Inicio from '../src/inicio';
 import App from '../src/Navigation';
 
 /*

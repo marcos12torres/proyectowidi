@@ -4,8 +4,6 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import * as React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
 
 
 //screens
@@ -13,8 +11,8 @@ import Login from "../src/Login/Login";
 import Inicio from "../src/inicio";
 import AlumnoViewScreen from "../src/Alumnos/AlumnoViewScreen";
 import PadresViewScreen from "../src/Padres/PadresViewScreen";
-import profesor from '../src/Profesor/profesor';
-//import alumnoScreen from "./alumnoScreen";
+import alumnoScreen from "../src/Profesor/profesor";
+//import SeleccionRolScreen  from "./RolesNicki";
 
 // Crear navigators
 const Tab = createBottomTabNavigator();
@@ -74,11 +72,9 @@ function MyDrawer() {
     <Drawer.Navigator initialRouteName="Home">     
         <Drawer.Screen name="Iniciar sesión" component={Login} />
         <Drawer.Screen name="Inicio" component={Inicio} />
-        <Drawer.Screen name="Planilla de seguimiento1" component={AlumnoViewScreen} />
-        <Drawer.Screen name="Planilla de seguimiento2" component={PadresViewScreen} />
-        <Drawer.Screen name="Profesor" component={profesor} />
-        
-        
+        <Drawer.Screen name="Pantalla del alumno" component={AlumnoViewScreen} />
+        <Drawer.Screen name="Pantalla que ve el padre" component={PadresViewScreen} />
+        <Drawer.Screen name="Profesor" component={alumnoScreen} />
 
     </Drawer.Navigator>
 
