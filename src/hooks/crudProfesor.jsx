@@ -19,3 +19,16 @@ name: input.name,
 console.log('Alumno');
 
 });
+
+//listar alumnos 
+
+firestore().collection('alumos').get()
+
+.then(querySnapshot => {
+
+querySnapshot.forEach(documentSnapshot => {
+
+console.log('Alumno ID_DEL_ALUMNO: ', documentSnapshot.id, documentSnapshot.data());
+});
+});
+
