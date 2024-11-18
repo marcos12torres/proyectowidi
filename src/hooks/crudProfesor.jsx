@@ -151,6 +151,6 @@ firestore().collection('alumnos').doc(userId).update({
     
     }).then(() => {
     
-    console.log('User updated!');
+    console.log('Alumno updated!');
     
     });
