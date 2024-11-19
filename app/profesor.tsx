@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ScrollView } from 'react-native';
-import { auth, provider } from '../auth/firebase'; // Importa la configuración de Firebase
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
-
-// Initialize Firebase Firestore
-const db = getFirestore();
+import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { db } from '../auth/firebase';
 
 interface Alumno {
+  id: string;
   nombre: string;
   comentario: string;
   aprobado: boolean;
@@ -15,106 +13,80 @@ interface Alumno {
 }
 
 const AlumnosScreen: React.FC = () => {
-  const [alumnos, setAlumnos] = useState<Alumno[]>([
-    { nombre: 'Pepito Juarez', comentario: '', aprobado: false, entregados: false, comunicaciones: false },
-    { nombre: 'Sandra Martines', comentario: '', aprobado: false, entregados: false, comunicaciones: false },
-    { nombre: 'Esteban Quito', comentario: '', aprobado: false, entregados: false, comunicaciones: false },
-    { nombre: 'Mema Mosiempre', comentario: '', aprobado: false, entregados: false, comunicaciones: false },
-    { nombre: 'Fito Paez', comentario: '', aprobado: false, entregados: false, comunicaciones: false },
-  ]);
-
-  const [alumnos2, setAlumnos2] = useState<Alumno[]>([
-    { nombre: 'Sasa Toto', comentario: '', aprobado: false, entregados: false, comunicaciones: false },
-    { nombre: 'Sisi Pp', comentario: '', aprobado: false, entregados: false, comunicaciones: false },
-  ]);
-
-  const [alumnos3, setAlumnos3] = useState<Alumno[]>([
-    { nombre: 'Caca Sese', comentario: '', aprobado: false, entregados: false, comunicaciones: false },
-    { nombre: 'Esperanza Si', comentario: '', aprobado: false, entregados: false, comunicaciones: false },
-  ]);
-
-  const [alumnos4, setAlumnos4] = useState<Alumno[]>([
-    { nombre: 'Pepe El Grilo', comentario: '', aprobado: false, entregados: false, comunicaciones: false },
-    { nombre: 'Palo Nooo', comentario: '', aprobado: false, entregados: false, comunicaciones: false },
-  ]);
-
+  const cursosPredefenidos = ['6º1', '6º2', '6º3', '6º4'];
+  const [alumnos, setAlumnos] = useState<Alumno[]>([]);
+  const [cursos, setCursos] = useState<string[]>(cursosPredefenidos);
   const [selectedCurso, setSelectedCurso] = useState('6º1');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showMateriasMenu, setShowMateriasMenu] = useState<boolean>(false);
   const [showCursosMenu, setShowCursosMenu] = useState<boolean>(false);
-
   const [cursoToAdd, setCursoToAdd] = useState('');
   const [alumnoToAdd, setAlumnoToAdd] = useState('');
 
+  useEffect(() => {
+    const cursosRef = collection(db, 'cursos');
+    const unsubscribe = onSnapshot(cursosRef, (snapshot) => {
+      const cursosNuevos = snapshot.docs.map(doc => doc.data().nombre);
+      const todosCursos = [...cursosPredefenidos, ...cursosNuevos];
+      // Eliminar duplicados si existieran
+      const cursosUnicos = [...new Set(todosCursos)];
+      setCursos(cursosUnicos);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const q = query(
+      collection(db, `cursos/${selectedCurso}/alumnos`),
+      orderBy('createdAt', 'asc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const alumnosData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Alumno[];
+      setAlumnos(alumnosData);
+    });
+
+    return () => unsubscribe();
+  }, [selectedCurso]);
   const handleSearch = (text: string) => {
     setSearchQuery(text);
   };
 
   const handleCommentChange = (index: number, text: string) => {
-    const updatedAlumnos = [...renderAlumnos()];
+    const updatedAlumnos = [...alumnos];
     updatedAlumnos[index].comentario = text;
-    setCurrentAlumnos(updatedAlumnos);
+    setAlumnos(updatedAlumnos);
   };
 
   const handleAprobadoChange = (index: number) => {
-    const updatedAlumnos = [...renderAlumnos()];
+    const updatedAlumnos = [...alumnos];
     updatedAlumnos[index].aprobado = !updatedAlumnos[index].aprobado;
-    setCurrentAlumnos(updatedAlumnos);
+    setAlumnos(updatedAlumnos);
   };
 
   const handleEntregadosChange = (index: number) => {
-    const updatedAlumnos = [...renderAlumnos()];
+    const updatedAlumnos = [...alumnos];
     updatedAlumnos[index].entregados = !updatedAlumnos[index].entregados;
-    setCurrentAlumnos(updatedAlumnos);
+    setAlumnos(updatedAlumnos);
   };
 
   const handleComunicacionesChange = (index: number) => {
-    const updatedAlumnos = [...renderAlumnos()];
+    const updatedAlumnos = [...alumnos];
     updatedAlumnos[index].comunicaciones = !updatedAlumnos[index].comunicaciones;
-    setCurrentAlumnos(updatedAlumnos);
+    setAlumnos(updatedAlumnos);
   };
 
   const handleDelete = (index: number) => {
-    const updatedAlumnos = [...renderAlumnos()];
+    const updatedAlumnos = [...alumnos];
     updatedAlumnos.splice(index, 1);
-    setCurrentAlumnos(updatedAlumnos);
+    setAlumnos(updatedAlumnos);
   };
 
-  const renderAlumnos = () => {
-    switch (selectedCurso) {
-      case '6º1':
-        return alumnos;
-      case '6º2':
-        return alumnos2;
-      case '6º3':
-        return alumnos3;
-      case '6º4':
-        return alumnos4;
-      default:
-        return [];
-    }
- };
-
-  const setCurrentAlumnos = (updatedAlumnos: Alumno[]) => {
-    switch (selectedCurso) {
-      case '6º1':
-        setAlumnos(updatedAlumnos);
-        break;
-      case '6º2':
-        setAlumnos2(updatedAlumnos);
-        break;
-      case '6º3':
-        setAlumnos3(updatedAlumnos);
-        break;
-      case '6º4':
-        setAlumnos4(updatedAlumnos);
-        break;
-      default:
-        break;
-    }
-  };
-
-  const filteredAlumnos = renderAlumnos().filter(alumno =>
+  const filteredAlumnos = alumnos.filter(alumno =>
     alumno.nombre.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -128,32 +100,46 @@ const AlumnosScreen: React.FC = () => {
 
   const handleCursoChange = (curso: string) => {
     setSelectedCurso(curso);
-    setSearchQuery('');  // Limpiar búsqueda al cambiar de curso
+    setSearchQuery('');
+    setShowCursosMenu(false); // Cerrar el menú después de seleccionar
   };
 
   const handleAddCurso = async () => {
     try {
       const cursoRef = collection(db, 'cursos');
-      await addDoc(cursoRef, { nombre: cursoToAdd });
-      console.log(`Curso added with ID: ${cursoToAdd}`);
+      const cursoData = {
+        nombre: cursoToAdd,
+        createdAt: serverTimestamp(),
+        alumnos: []
+      };
+      
+      await addDoc(cursoRef, cursoData);
+      console.log(`Curso agregado: ${cursoToAdd}`);
+      setCursoToAdd('');
     } catch (error) {
-      console.error(`Error adding curso: ${error}`);
+      console.error(`Error al agregar curso: ${error}`);
     }
   };
 
   const handleAddAlumno = async () => {
     try {
-      const cursoId = selectedCurso; 
-      const alumnoRef = collection(db, `cursos/${cursoId}/alumnos`);
-      await addDoc(alumnoRef, { nombre: alumnoToAdd });
-      console.log(`Alumno added to curso ${cursoId} with ID: ${alumnoToAdd}`);
+      const alumnoData = {
+        nombre: alumnoToAdd,
+        comentario: '',
+        aprobado: false,
+        entregados: false,
+        comunicaciones: false,
+        createdAt: serverTimestamp()
+      };
+      
+      const alumnoRef = collection(db, `cursos/${selectedCurso}/alumnos`);
+      await addDoc(alumnoRef, alumnoData);
+      console.log(`Alumno agregado a ${selectedCurso}: ${alumnoToAdd}`);
+      setAlumnoToAdd('');
     } catch (error) {
-      console.error(`Error adding alumno to curso ${cursoId}: ${error}`);
+      console.error(`Error al agregar alumno: ${error}`);
     }
   };
-
-  
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -234,18 +220,15 @@ const AlumnosScreen: React.FC = () => {
       )}
       {showCursosMenu && (
         <View style={styles.cursosMenu}>
-          <TouchableOpacity style={styles.cursoItem} onPress={() => handleCursoChange('6º1')}>
-            <Text style={styles.cursoItemText}>6º1</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cursoItem} onPress={() => handleCursoChange('6º2')}>
-            <Text style={styles.cursoItemText}>6º2</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cursoItem} onPress={() => handleCursoChange('6º3')}>
-            <Text style={styles.cursoItemText}>6º3</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cursoItem} onPress={() => handleCursoChange('6º4')}>
-            <Text style={styles.cursoItemText}>6º4</Text>
-          </TouchableOpacity>
+          {cursos.map((curso) => (
+            <TouchableOpacity 
+              key={curso} 
+              style={styles.cursoItem} 
+              onPress={() => handleCursoChange(curso)}
+            >
+              <Text style={styles.cursoItemText}>{curso}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
       )}
       <View style={styles.buttonContainer}>
@@ -272,7 +255,6 @@ const AlumnosScreen: React.FC = () => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -285,7 +267,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    margin:  10,
+    margin: 10,
     elevation: 4,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -335,7 +317,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   contentWrapper: {
-    flex: 1, 
+    flex: 1,
   },
   sectionTitle: {
     fontSize: 18,
@@ -459,6 +441,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginVertical: 20,
+    padding: 10,
   },
   button: {
     backgroundColor: '#4CAF50',
