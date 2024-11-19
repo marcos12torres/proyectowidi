@@ -1,8 +1,8 @@
 import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import Login from '../src/Login/Login';
-import Inicio from '../src/inicio';
-import AlumnoScreen from '../src/Alumnos/AlumnoScreen'
+import Login from './Login/Login';
+import Inicio from './inicio';
+import AlumnoScreen from './Alumnos/AlumnoScreen';
 import PadresViewScreen from './Padres/PadresViewScreen';
 
 const Drawer = createDrawerNavigator();
