@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ScrollView } from 'react-native';
-import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  serverTimestamp, 
+  onSnapshot, 
+  query, 
+  orderBy,
+  doc,
+  updateDoc,
+  deleteDoc
+} from 'firebase/firestore';
 import { db } from '../auth/firebase';
 
 interface Alumno {
@@ -28,7 +39,6 @@ const AlumnosScreen: React.FC = () => {
     const unsubscribe = onSnapshot(cursosRef, (snapshot) => {
       const cursosNuevos = snapshot.docs.map(doc => doc.data().nombre);
       const todosCursos = [...cursosPredefenidos, ...cursosNuevos];
-      // Eliminar duplicados si existieran
       const cursosUnicos = [...new Set(todosCursos)];
       setCursos(cursosUnicos);
     });
@@ -52,40 +62,68 @@ const AlumnosScreen: React.FC = () => {
 
     return () => unsubscribe();
   }, [selectedCurso]);
+
   const handleSearch = (text: string) => {
     setSearchQuery(text);
   };
 
-  const handleCommentChange = (index: number, text: string) => {
-    const updatedAlumnos = [...alumnos];
-    updatedAlumnos[index].comentario = text;
-    setAlumnos(updatedAlumnos);
+  const handleCommentChange = async (index: number, text: string) => {
+    try {
+      const alumno = alumnos[index];
+      const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
+      await updateDoc(alumnoRef, {
+        comentario: text
+      });
+    } catch (error) {
+      console.error('Error al actualizar comentario:', error);
+    }
   };
 
-  const handleAprobadoChange = (index: number) => {
-    const updatedAlumnos = [...alumnos];
-    updatedAlumnos[index].aprobado = !updatedAlumnos[index].aprobado;
-    setAlumnos(updatedAlumnos);
+  const handleAprobadoChange = async (index: number) => {
+    try {
+      const alumno = alumnos[index];
+      const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
+      await updateDoc(alumnoRef, {
+        aprobado: !alumno.aprobado
+      });
+    } catch (error) {
+      console.error('Error al actualizar estado aprobado:', error);
+    }
   };
 
-  const handleEntregadosChange = (index: number) => {
-    const updatedAlumnos = [...alumnos];
-    updatedAlumnos[index].entregados = !updatedAlumnos[index].entregados;
-    setAlumnos(updatedAlumnos);
+  const handleEntregadosChange = async (index: number) => {
+    try {
+      const alumno = alumnos[index];
+      const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
+      await updateDoc(alumnoRef, {
+        entregados: !alumno.entregados
+      });
+    } catch (error) {
+      console.error('Error al actualizar estado entregados:', error);
+    }
   };
 
-  const handleComunicacionesChange = (index: number) => {
-    const updatedAlumnos = [...alumnos];
-    updatedAlumnos[index].comunicaciones = !updatedAlumnos[index].comunicaciones;
-    setAlumnos(updatedAlumnos);
+  const handleComunicacionesChange = async (index: number) => {
+    try {
+      const alumno = alumnos[index];
+      const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
+      await updateDoc(alumnoRef, {
+        comunicaciones: !alumno.comunicaciones
+      });
+    } catch (error) {
+      console.error('Error al actualizar estado comunicaciones:', error);
+    }
   };
 
-  const handleDelete = (index: number) => {
-    const updatedAlumnos = [...alumnos];
-    updatedAlumnos.splice(index, 1);
-    setAlumnos(updatedAlumnos);
+  const handleDelete = async (index: number) => {
+    try {
+      const alumno = alumnos[index];
+      const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
+      await deleteDoc(alumnoRef);
+    } catch (error) {
+      console.error('Error al eliminar alumno:', error);
+    }
   };
-
   const filteredAlumnos = alumnos.filter(alumno =>
     alumno.nombre.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -101,7 +139,7 @@ const AlumnosScreen: React.FC = () => {
   const handleCursoChange = (curso: string) => {
     setSelectedCurso(curso);
     setSearchQuery('');
-    setShowCursosMenu(false); // Cerrar el menú después de seleccionar
+    setShowCursosMenu(false);
   };
 
   const handleAddCurso = async () => {
@@ -140,6 +178,7 @@ const AlumnosScreen: React.FC = () => {
       console.error(`Error al agregar alumno: ${error}`);
     }
   };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -182,7 +221,7 @@ const AlumnosScreen: React.FC = () => {
             <View style={styles.tableBody}>
               <FlatList
                 data={filteredAlumnos}
-                keyExtractor={(item, index) => index.toString()}
+                keyExtractor={(item) => item.id}
                 renderItem={({ item, index }) => (
                   <View style={styles.tableRow}>
                     <Text style={styles.tableRowText}>{item.nombre}</Text>
@@ -231,7 +270,7 @@ const AlumnosScreen: React.FC = () => {
           ))}
         </View>
       )}
-      <View style={styles.buttonContainer}>
+            <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleAddCurso}>
           <Text style={styles.buttonText}>agregar Curso</Text>
         </TouchableOpacity>
@@ -255,6 +294,7 @@ const AlumnosScreen: React.FC = () => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
