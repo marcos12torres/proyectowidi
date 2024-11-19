@@ -143,7 +143,7 @@ const AlumnosScreen: React.FC = () => {
 
   const handleAddAlumno = async () => {
     try {
-      const cursoId = selectedCurso; // Get the selected curso ID
+      const cursoId = selectedCurso; 
       const alumnoRef = collection(db, `cursos/${cursoId}/alumnos`);
       await addDoc(alumnoRef, { nombre: alumnoToAdd });
       console.log(`Alumno added to curso ${cursoId} with ID: ${alumnoToAdd}`);
@@ -151,6 +151,8 @@ const AlumnosScreen: React.FC = () => {
       console.error(`Error adding alumno to curso ${cursoId}: ${error}`);
     }
   };
+
+  
 
   return (
     <View style={styles.container}>
@@ -248,21 +250,21 @@ const AlumnosScreen: React.FC = () => {
       )}
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleAddCurso}>
-          <Text style={styles.buttonText}>Add Curso</Text>
+          <Text style={styles.buttonText}>agregar Curso</Text>
         </TouchableOpacity>
         <TextInput
           style={styles.input}
-          placeholder="Curso name"
+          placeholder="nombre del curso"
           value={cursoToAdd}
           onChangeText={(text) => setCursoToAdd(text)}
         />
 
         <TouchableOpacity style={styles.button} onPress={handleAddAlumno}>
-          <Text style={styles.buttonText}>Add Alumno</Text>
+          <Text style={styles.buttonText}>guardar Alumno</Text>
         </TouchableOpacity>
         <TextInput
           style={styles.input}
-          placeholder="Alumno name"
+          placeholder="nombre del alumno"
           value={alumnoToAdd}
           onChangeText={(text) => setAlumnoToAdd(text)}
         />
