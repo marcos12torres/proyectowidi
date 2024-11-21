@@ -22,7 +22,7 @@ const AlumnoScreen = () => {
 
         if (user) {
           const alumnoId = user.uid;
-          const cursoId = "6*6";
+          const cursoId = "6°6";
 
           const alumnoDoc = await firestore()
             .collection('cursos')
