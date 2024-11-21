@@ -13,7 +13,6 @@ import {
   useWindowDimensions
 } from 'react-native';
 import { 
-  getFirestore, 
   collection, 
   addDoc, 
   serverTimestamp, 
@@ -26,7 +25,7 @@ import {
   where,
   getDocs
 } from 'firebase/firestore';
-import { db } from '../auth/firebase';
+import { db } from '@/auth/firebase';
 
 // Obtener dimensiones de la pantalla
 const windowWidth = Dimensions.get('window').width;
