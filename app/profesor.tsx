@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ScrollView } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TextInput, 
+  TouchableOpacity, 
+  FlatList, 
+  ScrollView, 
+  Alert,
+  Dimensions,
+  Platform,
+  useWindowDimensions
+} from 'react-native';
 import { 
   getFirestore, 
   collection, 
@@ -10,9 +22,41 @@ import {
   orderBy,
   doc,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  where,
+  getDocs
 } from 'firebase/firestore';
 import { db } from '../auth/firebase';
+
+// Obtener dimensiones de la pantalla
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
+// Configuración responsive
+const isSmallDevice = windowWidth < 768;
+const fontSize = isSmallDevice ? {
+  small: 12,
+  medium: 14,
+  large: 16,
+  xlarge: 18
+} : {
+  small: 14,
+  medium: 16,
+  large: 20,
+  xlarge: 24
+};
+
+const padding = isSmallDevice ? {
+  small: 5,
+  medium: 8,
+  large: 10,
+  xlarge: 15
+} : {
+  small: 8,
+  medium: 10,
+  large: 15,
+  xlarge: 20
+};
 
 interface Alumno {
   id: string;
@@ -21,35 +65,66 @@ interface Alumno {
   aprobado: boolean;
   entregados: boolean;
   comunicaciones: boolean;
+  createdAt: any;
+  updatedAt: any;
 }
 
 const AlumnosScreen: React.FC = () => {
+  const dimensions = useWindowDimensions();
+  const isSmallScreen = dimensions.width < 768;
   const cursosPredefenidos = ['6º1', '6º2', '6º3', '6º4'];
   const [alumnos, setAlumnos] = useState<Alumno[]>([]);
-  const [cursos, setCursos] = useState<string[]>(cursosPredefenidos);
+  const [cursos, setCursos] = useState<string[]>([]);
   const [selectedCurso, setSelectedCurso] = useState('6º1');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showMateriasMenu, setShowMateriasMenu] = useState<boolean>(false);
   const [showCursosMenu, setShowCursosMenu] = useState<boolean>(false);
   const [cursoToAdd, setCursoToAdd] = useState('');
   const [alumnoToAdd, setAlumnoToAdd] = useState('');
+  const [orientation, setOrientation] = useState('portrait');
 
   useEffect(() => {
-    const cursosRef = collection(db, 'cursos');
-    const unsubscribe = onSnapshot(cursosRef, (snapshot) => {
-      const cursosNuevos = snapshot.docs.map(doc => doc.data().nombre);
-      const todosCursos = [...cursosPredefenidos, ...cursosNuevos];
-      const cursosUnicos = [...new Set(todosCursos)];
-      setCursos(cursosUnicos);
+    const subscription = Dimensions.addEventListener('change', ({ window: { width, height } }) => {
+      setOrientation(width < height ? 'portrait' : 'landscape');
     });
 
-    return () => unsubscribe();
+    const initializeCursos = async () => {
+      const cursosRef = collection(db, 'cursos');
+      
+      for (const curso of cursosPredefenidos) {
+        const q = query(cursosRef, where('nombre', '==', curso));
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+          await addDoc(cursosRef, {
+            nombre: curso,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+        }
+      }
+
+      const unsubscribe = onSnapshot(cursosRef, (snapshot) => {
+        const cursosData = snapshot.docs.map(doc => doc.data().nombre);
+        setCursos(cursosData.sort());
+      });
+
+      return () => {
+        unsubscribe();
+      };
+    };
+
+    initializeCursos();
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   useEffect(() => {
     const q = query(
       collection(db, `cursos/${selectedCurso}/alumnos`),
-      orderBy('createdAt', 'asc')
+      orderBy('updatedAt', 'desc')
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -58,11 +133,13 @@ const AlumnosScreen: React.FC = () => {
         ...doc.data()
       })) as Alumno[];
       setAlumnos(alumnosData);
+    }, (error) => {
+      console.error("Error al escuchar cambios:", error);
+      Alert.alert("Error", "No se pudieron cargar los alumnos");
     });
 
     return () => unsubscribe();
   }, [selectedCurso]);
-
   const handleSearch = (text: string) => {
     setSearchQuery(text);
   };
@@ -72,10 +149,12 @@ const AlumnosScreen: React.FC = () => {
       const alumno = alumnos[index];
       const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
       await updateDoc(alumnoRef, {
-        comentario: text
+        comentario: text,
+        updatedAt: serverTimestamp()
       });
     } catch (error) {
       console.error('Error al actualizar comentario:', error);
+      Alert.alert('Error', 'No se pudo guardar el comentario');
     }
   };
 
@@ -84,10 +163,12 @@ const AlumnosScreen: React.FC = () => {
       const alumno = alumnos[index];
       const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
       await updateDoc(alumnoRef, {
-        aprobado: !alumno.aprobado
+        aprobado: !alumno.aprobado,
+        updatedAt: serverTimestamp()
       });
     } catch (error) {
       console.error('Error al actualizar estado aprobado:', error);
+      Alert.alert('Error', 'No se pudo actualizar el estado');
     }
   };
 
@@ -96,10 +177,12 @@ const AlumnosScreen: React.FC = () => {
       const alumno = alumnos[index];
       const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
       await updateDoc(alumnoRef, {
-        entregados: !alumno.entregados
+        entregados: !alumno.entregados,
+        updatedAt: serverTimestamp()
       });
     } catch (error) {
       console.error('Error al actualizar estado entregados:', error);
+      Alert.alert('Error', 'No se pudo actualizar el estado');
     }
   };
 
@@ -108,32 +191,54 @@ const AlumnosScreen: React.FC = () => {
       const alumno = alumnos[index];
       const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
       await updateDoc(alumnoRef, {
-        comunicaciones: !alumno.comunicaciones
+        comunicaciones: !alumno.comunicaciones,
+        updatedAt: serverTimestamp()
       });
     } catch (error) {
       console.error('Error al actualizar estado comunicaciones:', error);
+      Alert.alert('Error', 'No se pudo actualizar el estado');
     }
   };
 
   const handleDelete = async (index: number) => {
     try {
       const alumno = alumnos[index];
-      const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
-      await deleteDoc(alumnoRef);
+      Alert.alert(
+        "Confirmar eliminación",
+        `¿Está seguro de eliminar a ${alumno.nombre}?`,
+        [
+          {
+            text: "Cancelar",
+            style: "cancel"
+          },
+          {
+            text: "Eliminar",
+            onPress: async () => {
+              const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
+              await deleteDoc(alumnoRef);
+            },
+            style: "destructive"
+          }
+        ]
+      );
     } catch (error) {
       console.error('Error al eliminar alumno:', error);
+      Alert.alert('Error', 'No se pudo eliminar el alumno');
     }
   };
+
   const filteredAlumnos = alumnos.filter(alumno =>
     alumno.nombre.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const toggleMateriasMenu = () => {
     setShowMateriasMenu(!showMateriasMenu);
+    if (showCursosMenu) setShowCursosMenu(false);
   };
 
   const toggleCursosMenu = () => {
     setShowCursosMenu(!showCursosMenu);
+    if (showMateriasMenu) setShowMateriasMenu(false);
   };
 
   const handleCursoChange = (curso: string) => {
@@ -141,107 +246,198 @@ const AlumnosScreen: React.FC = () => {
     setSearchQuery('');
     setShowCursosMenu(false);
   };
-
   const handleAddCurso = async () => {
     try {
-      const cursoRef = collection(db, 'cursos');
+      if (!cursoToAdd.trim()) {
+        Alert.alert('Error', 'Por favor ingrese un nombre de curso');
+        return;
+      }
+
+      const cursosRef = collection(db, 'cursos');
+      const q = query(cursosRef, where('nombre', '==', cursoToAdd));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        Alert.alert('Error', 'Este curso ya existe');
+        return;
+      }
+
+      const timestamp = serverTimestamp();
       const cursoData = {
         nombre: cursoToAdd,
-        createdAt: serverTimestamp(),
-        alumnos: []
+        createdAt: timestamp,
+        updatedAt: timestamp
       };
       
-      await addDoc(cursoRef, cursoData);
-      console.log(`Curso agregado: ${cursoToAdd}`);
+      await addDoc(cursosRef, cursoData);
       setCursoToAdd('');
     } catch (error) {
       console.error(`Error al agregar curso: ${error}`);
+      Alert.alert('Error', 'No se pudo agregar el curso');
     }
   };
 
   const handleAddAlumno = async () => {
     try {
+      if (!alumnoToAdd.trim()) {
+        Alert.alert('Error', 'Por favor ingrese un nombre de alumno');
+        return;
+      }
+
+      const timestamp = serverTimestamp();
       const alumnoData = {
         nombre: alumnoToAdd,
         comentario: '',
         aprobado: false,
         entregados: false,
         comunicaciones: false,
-        createdAt: serverTimestamp()
+        createdAt: timestamp,
+        updatedAt: timestamp
       };
       
       const alumnoRef = collection(db, `cursos/${selectedCurso}/alumnos`);
       await addDoc(alumnoRef, alumnoData);
-      console.log(`Alumno agregado a ${selectedCurso}: ${alumnoToAdd}`);
       setAlumnoToAdd('');
     } catch (error) {
       console.error(`Error al agregar alumno: ${error}`);
+      Alert.alert('Error', 'No se pudo agregar el alumno');
     }
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[
+        styles.header,
+        isSmallScreen && styles.headerMobile
+      ]}>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Seguimiento de Alumnos</Text>
+          <Text style={[
+            styles.title,
+            isSmallScreen && styles.titleMobile
+          ]}>Seguimiento de Alumnos</Text>
         </View>
-        <View style={styles.filterContainer}>
+        <View style={[
+          styles.filterContainer,
+          isSmallScreen && styles.filterContainerMobile
+        ]}>
           <View style={styles.filterButton}>
-            <Text style={styles.filterButtonText}>Filtros</Text>
+            <Text style={[
+              styles.filterButtonText,
+              isSmallScreen && styles.filterButtonTextMobile
+            ]}>Filtros</Text>
             <View style={styles.filterIcons}>
-              <TouchableOpacity style={styles.filterIcon} onPress={toggleCursosMenu}>
+              <TouchableOpacity 
+                style={[
+                  styles.filterIcon,
+                  isSmallScreen && styles.filterIconMobile
+                ]} 
+                onPress={toggleCursosMenu}
+              >
                 <Text style={styles.filterIconText}>Cursos</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.filterIcon} onPress={toggleMateriasMenu}>
+              <TouchableOpacity 
+                style={[
+                  styles.filterIcon,
+                  isSmallScreen && styles.filterIconMobile
+                ]} 
+                onPress={toggleMateriasMenu}
+              >
                 <Text style={styles.filterIconText}>Materias</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </View>
-      <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={styles.content}>
-        <View style={styles.contentWrapper}>
-          <Text style={styles.sectionTitle}>{` ${selectedCurso}/alumnos`}</Text>
+      <ScrollView 
+        horizontal={isSmallScreen}
+        showsHorizontalScrollIndicator={true}
+        showsVerticalScrollIndicator={true}
+        style={[styles.content, isSmallScreen && styles.contentMobile]}
+      >
+        <View style={[styles.contentWrapper, isSmallScreen && styles.contentWrapperMobile]}>
+          <Text style={[styles.sectionTitle, isSmallScreen && styles.sectionTitleMobile]}>
+            {` ${selectedCurso}/alumnos`}
+          </Text>
+          
           <View style={styles.searchContainer}>
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, isSmallScreen && styles.searchInputMobile]}
               placeholder="Buscar alumnos..."
               onChangeText={handleSearch}
               value={searchQuery}
             />
           </View>
-          <View style={styles.tableContainer}>
-            <View style={styles.tableHeader}>
-              <Text style={styles.tableHeaderText}>Alumnos</Text>
-              <Text style={styles.tableHeaderText}>Comentario</Text>
-              <Text style={styles.tableHeaderText}>Notas</Text>
-              <Text style={styles.tableHeaderText}>Trabajos</Text>
-              <Text style={styles.tableHeaderText}>Cuaderno de Comunicaciones</Text>
+
+          <View style={[styles.tableContainer, isSmallScreen && styles.tableContainerMobile]}>
+            <View style={[styles.tableHeader, isSmallScreen && styles.tableHeaderMobile]}>
+              <Text style={[styles.tableHeaderText, isSmallScreen && styles.tableHeaderTextMobile]}>Alumnos</Text>
+              <Text style={[styles.tableHeaderText, isSmallScreen && styles.tableHeaderTextMobile]}>Comentario</Text>
+              <Text style={[styles.tableHeaderText, isSmallScreen && styles.tableHeaderTextMobile]}>Notas</Text>
+              <Text style={[styles.tableHeaderText, isSmallScreen && styles.tableHeaderTextMobile]}>Trabajos</Text>
+              <Text style={[styles.tableHeaderText, isSmallScreen && styles.tableHeaderTextMobile]}>Comunicaciones</Text>
+              <Text style={[styles.tableHeaderText, isSmallScreen && styles.tableHeaderTextMobile]}>Acciones</Text>
             </View>
+
             <View style={styles.tableBody}>
               <FlatList
                 data={filteredAlumnos}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item, index }) => (
-                  <View style={styles.tableRow}>
-                    <Text style={styles.tableRowText}>{item.nombre}</Text>
+                  <View style={[styles.tableRow, isSmallScreen && styles.tableRowMobile]}>
+                    <Text style={[styles.tableRowText, isSmallScreen && styles.tableRowTextMobile]}>
+                      {item.nombre}
+                    </Text>
                     <TextInput
-                      style={styles.tableRowInput}
+                      style={[styles.tableRowInput, isSmallScreen && styles.tableRowInputMobile]}
                       placeholder="Comentario"
                       onChangeText={(text) => handleCommentChange(index, text)}
                       value={item.comentario}
+                      multiline={true}
+                      numberOfLines={2}
                     />
-                    <TouchableOpacity style={styles.tableRowButton} onPress={() => handleAprobadoChange(index)}>
-                      <Text style={styles.tableRowButtonText}>{item.aprobado ? 'Aprobado' : 'No Aprobado'}</Text>
+                    <TouchableOpacity 
+                      style={[
+                        styles.tableRowButton, 
+                        item.aprobado && styles.tableRowButtonActive,
+                        isSmallScreen && styles.tableRowButtonMobile
+                      ]} 
+                      onPress={() => handleAprobadoChange(index)}
+                    >
+                      <Text style={[styles.tableRowButtonText, isSmallScreen && styles.tableRowButtonTextMobile]}>
+                        {item.aprobado ? 'Aprobado' : 'No Aprobado'}
+                      </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.tableRowButton} onPress={() => handleEntregadosChange(index)}>
-                      <Text style={styles.tableRowButtonText}>{item.entregados ? 'Entregados' : 'No Entregados'}</Text>
+                    <TouchableOpacity 
+                      style={[
+                        styles.tableRowButton, 
+                        item.entregados && styles.tableRowButtonActive,
+                        isSmallScreen && styles.tableRowButtonMobile
+                      ]} 
+                      onPress={() => handleEntregadosChange(index)}
+                    >
+                      <Text style={[styles.tableRowButtonText, isSmallScreen && styles.tableRowButtonTextMobile]}>
+                        {item.entregados ? 'Entregados' : 'No Entregados'}
+                      </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.tableRowButton} onPress={() => handleComunicacionesChange(index)}>
-                      <Text style={styles.tableRowButtonText}>{item.comunicaciones ? 'Si' : 'No'}</Text>
+                    <TouchableOpacity 
+                      style={[
+                        styles.tableRowButton, 
+                        item.comunicaciones && styles.tableRowButtonActive,
+                        isSmallScreen && styles.tableRowButtonMobile
+                      ]} 
+                      onPress={() => handleComunicacionesChange(index)}
+                    >
+                      <Text style={[styles.tableRowButtonText, isSmallScreen && styles.tableRowButtonTextMobile]}>
+                        {item.comunicaciones ? 'Si' : 'No'}
+                      </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(index)}>
-                      <Text style={styles.deleteButtonText}>Eliminar</Text>
+                    <TouchableOpacity 
+                      style={[styles.deleteButton, isSmallScreen && styles.deleteButtonMobile]} 
+                      onPress={() => handleDelete(index)}
+                    >
+                      <Text style={[styles.deleteButtonText, isSmallScreen && styles.deleteButtonTextMobile]}>
+                        Eliminar
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 )}
@@ -251,50 +447,85 @@ const AlumnosScreen: React.FC = () => {
         </View>
       </ScrollView>
       {showMateriasMenu && (
-        <View style={styles.materiasMenu}>
-          <Text style={styles.materiaItem}>Matemática</Text>
-          <Text style={styles.materiaItem}>Historia</Text>
-          <Text style={styles.materiaItem}>Lengua</Text>
+        <View style={[styles.materiasMenu, isSmallScreen && styles.materiasMenuMobile]}>
+          <ScrollView>
+            <Text style={[styles.materiaItem, isSmallScreen && styles.materiaItemMobile]}>
+              Matemática
+            </Text>
+            <Text style={[styles.materiaItem, isSmallScreen && styles.materiaItemMobile]}>
+              Historia
+            </Text>
+            <Text style={[styles.materiaItem, isSmallScreen && styles.materiaItemMobile]}>
+              Lengua
+            </Text>
+          </ScrollView>
         </View>
       )}
-      {showCursosMenu && (
-        <View style={styles.cursosMenu}>
-          {cursos.map((curso) => (
-            <TouchableOpacity 
-              key={curso} 
-              style={styles.cursoItem} 
-              onPress={() => handleCursoChange(curso)}
-            >
-              <Text style={styles.cursoItemText}>{curso}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
-            <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleAddCurso}>
-          <Text style={styles.buttonText}>agregar Curso</Text>
-        </TouchableOpacity>
-        <TextInput
-          style={styles.input}
-          placeholder="nombre del curso"
-          value={cursoToAdd}
-          onChangeText={(text) => setCursoToAdd(text)}
-        />
 
-        <TouchableOpacity style={styles.button} onPress={handleAddAlumno}>
-          <Text style={styles.buttonText}>guardar Alumno</Text>
-        </TouchableOpacity>
-        <TextInput
-          style={styles.input}
-          placeholder="nombre del alumno"
-          value={alumnoToAdd}
-          onChangeText={(text) => setAlumnoToAdd(text)}
-        />
+      {showCursosMenu && (
+        <View style={[styles.cursosMenu, isSmallScreen && styles.cursosMenuMobile]}>
+          <ScrollView style={{ maxHeight: isSmallScreen ? windowHeight * 0.4 : windowHeight * 0.6 }}>
+            {cursos.map((curso) => (
+              <TouchableOpacity 
+                key={curso} 
+                style={[
+                  styles.cursoItem,
+                  selectedCurso === curso && styles.cursoItemSelected,
+                  isSmallScreen && styles.cursoItemMobile
+                ]} 
+                onPress={() => handleCursoChange(curso)}
+              >
+                <Text style={[
+                  styles.cursoItemText,
+                  selectedCurso === curso && styles.cursoItemTextSelected,
+                  isSmallScreen && styles.cursoItemTextMobile
+                ]}>
+                  {curso}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      <View style={[styles.buttonContainer, isSmallScreen && styles.buttonContainerMobile]}>
+        <View style={[styles.inputGroup, isSmallScreen && styles.inputGroupMobile]}>
+          <TouchableOpacity 
+            style={[styles.button, isSmallScreen && styles.buttonMobile]} 
+            onPress={handleAddCurso}
+          >
+            <Text style={[styles.buttonText, isSmallScreen && styles.buttonTextMobile]}>
+              Agregar Curso
+            </Text>
+          </TouchableOpacity>
+          <TextInput
+            style={[styles.input, isSmallScreen && styles.inputMobile]}
+            placeholder="Nombre del curso"
+            value={cursoToAdd}
+            onChangeText={(text) => setCursoToAdd(text)}
+          />
+        </View>
+
+        <View style={[styles.inputGroup, isSmallScreen && styles.inputGroupMobile]}>
+          <TouchableOpacity 
+            style={[styles.button, isSmallScreen && styles.buttonMobile]} 
+            onPress={handleAddAlumno}
+          >
+            <Text style={[styles.buttonText, isSmallScreen && styles.buttonTextMobile]}>
+              Guardar Alumno
+            </Text>
+          </TouchableOpacity>
+          <TextInput
+            style={[styles.input, isSmallScreen && styles.inputMobile]}
+            placeholder="Nombre del alumno"
+            value={alumnoToAdd}
+            onChangeText={(text) => setAlumnoToAdd(text)}
+          />
+        </View>
       </View>
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -302,32 +533,43 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#7fffd4',
-    padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    margin: 10,
+    padding: padding.large,
+    borderRadius: 20,
+    margin: padding.medium,
     elevation: 4,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  headerMobile: {
+    padding: padding.medium,
+    margin: padding.small,
+    flexDirection: 'column',
+  },
   titleContainer: {
-    flex: 1,
+    flex: isSmallDevice ? 0 : 1,
+    marginBottom: isSmallDevice ? padding.medium : 0,
   },
   title: {
-    fontSize: 24,
+    fontSize: fontSize.xlarge,
     fontWeight: 'bold',
     color: 'black',
+  },
+  titleMobile: {
+    fontSize: fontSize.large,
+    textAlign: 'center',
   },
   filterContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  filterContainerMobile: {
+    width: '100%',
+    justifyContent: 'center',
+  },
   filterButton: {
     backgroundColor: '#fff',
-    padding: 10,
+    padding: padding.medium,
     borderRadius: 5,
     elevation: 2,
     flexDirection: 'row',
@@ -335,9 +577,12 @@ const styles = StyleSheet.create({
   },
   filterButtonText: {
     color: '#000',
-    fontSize: 16,
+    fontSize: fontSize.medium,
     fontWeight: 'bold',
-    marginRight: 10,
+    marginRight: padding.medium,
+  },
+  filterButtonTextMobile: {
+    fontSize: fontSize.small,
   },
   filterIcons: {
     flexDirection: 'row',
@@ -345,100 +590,172 @@ const styles = StyleSheet.create({
   },
   filterIcon: {
     backgroundColor: '#fff',
-    padding: 8,
+    padding: padding.medium,
     borderRadius: 5,
-    marginLeft: 5,
+    marginLeft: padding.small,
     elevation: 2,
+  },
+  filterIconMobile: {
+    padding: padding.small,
   },
   filterIconText: {
     color: '#000',
+    fontSize: isSmallDevice ? fontSize.small : fontSize.medium,
   },
   content: {
-    padding: 20,
+    padding: padding.large,
+  },
+  contentMobile: {
+    padding: padding.small,
   },
   contentWrapper: {
     flex: 1,
+    minWidth: isSmallDevice ? windowWidth * 1.5 : '100%',
+  },
+  contentWrapperMobile: {
+    minWidth: windowWidth * 2,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: fontSize.large,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: padding.medium,
+  },
+  sectionTitleMobile: {
+    fontSize: fontSize.medium,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: padding.medium,
   },
   searchInput: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 10,
+    padding: padding.medium,
     borderRadius: 5,
-    marginRight: 10,
+    marginRight: padding.medium,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    fontSize: fontSize.medium,
+  },
+  searchInputMobile: {
+    padding: padding.small,
+    fontSize: fontSize.small,
   },
   tableContainer: {
     backgroundColor: '#fff',
     borderRadius: 5,
-    marginBottom: 20,
-    padding: 10
+    marginBottom: padding.large,
+    padding: padding.medium,
+    minWidth: '100%',
+    elevation: 2,
+  },
+  tableContainerMobile: {
+    padding: padding.small,
   },
   tableHeader: {
     flexDirection: 'row',
     backgroundColor: '#B2DFEE',
-    padding: 10,
-    marginBottom: 10
+    padding: padding.medium,
+    marginBottom: padding.medium,
+    borderRadius: 5,
   },
-  tableBody: {
-    marginBottom: 10
+  tableHeaderMobile: {
+    padding: padding.small,
   },
   tableHeaderText: {
     flex: 1,
     fontWeight: 'bold',
     textAlign: 'center',
+    fontSize: fontSize.medium,
+  },
+  tableHeaderTextMobile: {
+    fontSize: fontSize.small,
+  },
+  tableBody: {
+    marginBottom: padding.medium,
   },
   tableRow: {
     flexDirection: 'row',
-    padding: 10,
+    padding: padding.medium,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+    alignItems: 'center',
+  },
+  tableRowMobile: {
+    padding: padding.small,
   },
   tableRowText: {
     flex: 1,
+    fontSize: fontSize.medium,
+  },
+  tableRowTextMobile: {
+    fontSize: fontSize.small,
   },
   tableRowInput: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 10,
+    padding: padding.medium,
     borderRadius: 5,
-    marginLeft: 10,
+    marginLeft: padding.medium,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    fontSize: fontSize.medium,
+  },
+  tableRowInputMobile: {
+    padding: padding.small,
+    marginLeft: padding.small,
+    fontSize: fontSize.small,
   },
   tableRowButton: {
     flex: 1,
-    backgroundColor: '#7FFFD4',
-    padding: 10,
+    backgroundColor: '#E0FFFF',
+    padding: padding.medium,
     borderRadius: 5,
-    marginLeft: 10,
+    marginLeft: padding.medium,
+    borderWidth: 1,
+    borderColor: '#B2DFEE',
+  },
+  tableRowButtonMobile: {
+    padding: padding.small,
+    marginLeft: padding.small,
+  },
+  tableRowButtonActive: {
+    backgroundColor: '#7FFFD4',
+    borderColor: '#4CAF50',
   },
   tableRowButtonText: {
     color: '#000000',
     textAlign: 'center',
+    fontSize: fontSize.medium,
+  },
+  tableRowButtonTextMobile: {
+    fontSize: fontSize.small,
   },
   deleteButton: {
     backgroundColor: '#f44336',
-    padding: 10,
+    padding: padding.medium,
     borderRadius: 5,
-    marginLeft: 10,
+    marginLeft: padding.medium,
+  },
+  deleteButtonMobile: {
+    padding: padding.small,
+    marginLeft: padding.small,
   },
   deleteButtonText: {
     color: '#fff',
     textAlign: 'center',
+    fontSize: fontSize.medium,
+  },
+  deleteButtonTextMobile: {
+    fontSize: fontSize.small,
   },
   materiasMenu: {
     position: 'absolute',
-    top: 60,
-    right: 0,
+    top: isSmallDevice ? 120 : 60,
+    right: padding.medium,
     backgroundColor: '#E0FFFF',
-    padding: 10,
+    padding: padding.medium,
     borderRadius: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -446,18 +763,26 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     zIndex: 10,
+    maxHeight: isSmallDevice ? windowHeight * 0.4 : windowHeight * 0.6,
+  },
+  materiasMenuMobile: {
+    right: padding.small,
+    padding: padding.small,
   },
   materiaItem: {
-    fontSize: 16,
-    paddingVertical: 5,
+    fontSize: fontSize.medium,
+    paddingVertical: padding.small,
     color: '#000',
+  },
+  materiaItemMobile: {
+    fontSize: fontSize.small,
   },
   cursosMenu: {
     position: 'absolute',
-    top: 80,
-    right: 125,
+    top: isSmallDevice ? 120 : 80,
+    right: isSmallDevice ? padding.medium : 125,
     backgroundColor: '#E0FFFF',
-    padding: 10,
+    padding: padding.medium,
     borderRadius: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -466,39 +791,85 @@ const styles = StyleSheet.create({
     elevation: 5,
     zIndex: 10,
   },
+  cursosMenuMobile: {
+    right: padding.large,
+    padding: padding.small,
+  },
   cursoItem: {
-    fontSize: 16,
-    paddingVertical: 5,
-    color: '#000',
+    paddingVertical: padding.medium,
+    paddingHorizontal: padding.large,
+    borderRadius: 5,
+  },
+  cursoItemMobile: {
+    paddingVertical: padding.small,
+    paddingHorizontal: padding.medium,
+  },
+  cursoItemSelected: {
+    backgroundColor: '#7FFFD4',
   },
   cursoItemText: {
-    fontSize: 16,
-    paddingVertical: 5,
+    fontSize: fontSize.medium,
     color: '#000',
+  },
+  cursoItemTextMobile: {
+    fontSize: fontSize.small,
+  },
+  cursoItemTextSelected: {
+    fontWeight: 'bold',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 20,
-    padding: 10,
+    marginVertical: padding.large,
+    padding: padding.medium,
+  },
+  buttonContainerMobile: {
+    flexDirection: 'column',
+    padding: padding.small,
+  },
+  inputGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: padding.medium,
+  },
+  inputGroupMobile: {
+    marginRight: 0,
+    marginBottom: padding.medium,
+    width: '100%',
   },
   button: {
     backgroundColor: '#4CAF50',
-    padding: 10,
+    padding: padding.medium,
     borderRadius: 5,
-    marginRight: 10,
+    marginRight: padding.medium,
+    elevation: 2,
+  },
+  buttonMobile: {
+    padding: padding.small,
+    marginRight: padding.small,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: fontSize.medium,
+  },
+  buttonTextMobile: {
+    fontSize: fontSize.small,
   },
   input: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 10,
+    padding: padding.medium,
     borderRadius: 5,
-    marginRight: 10,
+    marginRight: padding.medium,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    fontSize: fontSize.medium,
+  },
+  inputMobile: {
+    padding: padding.small,
+    fontSize: fontSize.small,
   },
 });
 
