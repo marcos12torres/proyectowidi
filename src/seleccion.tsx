@@ -1,7 +1,14 @@
 import React from 'react';
 import { View, Button, StyleSheet } from 'react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-const UserTypeSelectionScreen = ({ navigation }) => {
+type Props = {
+  navigation: NativeStackNavigationProp<any>;
+};
+
+
+
+const UserTypeSelectionScreen = ({ navigation }: Props) => {
   return (
     <View style={styles.container}>
       <Button
