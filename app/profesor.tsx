@@ -10,7 +10,8 @@ import {
   Alert,
   Dimensions,
   Platform,
-  useWindowDimensions
+  useWindowDimensions,
+  Modal
 } from 'react-native';
 import { 
   collection, 
@@ -62,16 +63,23 @@ interface Alumno {
   nombre: string;
   comentario: string;
   aprobado: boolean;
-  entregados: boolean;
+  trabajos: {
+    [key: string]: {
+      completado: boolean;
+      fecha: string;
+      comentario?: string;
+    };
+  };
   comunicaciones: boolean;
   createdAt: any;
   updatedAt: any;
 }
-
 const AlumnosScreen: React.FC = () => {
   const dimensions = useWindowDimensions();
   const isSmallScreen = dimensions.width < 768;
   const cursosPredefenidos = ['6º1', '6º2', '6º3', '6º4'];
+  
+  // Estados principales
   const [alumnos, setAlumnos] = useState<Alumno[]>([]);
   const [cursos, setCursos] = useState<string[]>([]);
   const [selectedCurso, setSelectedCurso] = useState('6º1');
@@ -81,6 +89,14 @@ const AlumnosScreen: React.FC = () => {
   const [cursoToAdd, setCursoToAdd] = useState('');
   const [alumnoToAdd, setAlumnoToAdd] = useState('');
   const [orientation, setOrientation] = useState('portrait');
+
+  // Nuevos estados para trabajos prácticos
+  const [trabajos, setTrabajos] = useState<string[]>(['TP1', 'TP2', 'TP3']);
+  const [nuevoTp, setNuevoTp] = useState('');
+  const [showTpModal, setShowTpModal] = useState(false);
+  const [selectedTp, setSelectedTp] = useState<string | null>(null);
+  const [selectedAlumnoIndex, setSelectedAlumnoIndex] = useState<number | null>(null);
+  const [tpComentario, setTpComentario] = useState('');
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window: { width, height } }) => {
@@ -139,183 +155,275 @@ const AlumnosScreen: React.FC = () => {
 
     return () => unsubscribe();
   }, [selectedCurso]);
-  const handleSearch = (text: string) => {
-    setSearchQuery(text);
-  };
+    // Manejadores básicos
+    const handleSearch = (text: string) => {
+      setSearchQuery(text);
+    };
+  
+    const handleCommentChange = async (index: number, text: string) => {
+      try {
+        const alumno = alumnos[index];
+        const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
+        await updateDoc(alumnoRef, {
+          comentario: text,
+          updatedAt: serverTimestamp()
+        });
+      } catch (error) {
+        console.error('Error al actualizar comentario:', error);
+        Alert.alert('Error', 'No se pudo guardar el comentario');
+      }
+    };
+  
+    const handleAprobadoChange = async (index: number) => {
+      try {
+        const alumno = alumnos[index];
+        const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
+        await updateDoc(alumnoRef, {
+          aprobado: !alumno.aprobado,
+          updatedAt: serverTimestamp()
+        });
+      } catch (error) {
+        console.error('Error al actualizar estado aprobado:', error);
+        Alert.alert('Error', 'No se pudo actualizar el estado');
+      }
+    };
+  
+    // Nuevos manejadores para TPs
+    const handleTpChange = async (alumnoIndex: number, tpNombre: string) => {
+      try {
+        const alumno = alumnos[alumnoIndex];
+        if (!alumno) return;
 
-  const handleCommentChange = async (index: number, text: string) => {
-    try {
-      const alumno = alumnos[index];
-      const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
-      await updateDoc(alumnoRef, {
-        comentario: text,
-        updatedAt: serverTimestamp()
-      });
-    } catch (error) {
-      console.error('Error al actualizar comentario:', error);
-      Alert.alert('Error', 'No se pudo guardar el comentario');
-    }
-  };
-
-  const handleAprobadoChange = async (index: number) => {
-    try {
-      const alumno = alumnos[index];
-      const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
-      await updateDoc(alumnoRef, {
-        aprobado: !alumno.aprobado,
-        updatedAt: serverTimestamp()
-      });
-    } catch (error) {
-      console.error('Error al actualizar estado aprobado:', error);
-      Alert.alert('Error', 'No se pudo actualizar el estado');
-    }
-  };
-
-  const handleEntregadosChange = async (index: number) => {
-    try {
-      const alumno = alumnos[index];
-      const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
-      await updateDoc(alumnoRef, {
-        entregados: !alumno.entregados,
-        updatedAt: serverTimestamp()
-      });
-    } catch (error) {
-      console.error('Error al actualizar estado entregados:', error);
-      Alert.alert('Error', 'No se pudo actualizar el estado');
-    }
-  };
-
-  const handleComunicacionesChange = async (index: number) => {
-    try {
-      const alumno = alumnos[index];
-      const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
-      await updateDoc(alumnoRef, {
-        comunicaciones: !alumno.comunicaciones,
-        updatedAt: serverTimestamp()
-      });
-    } catch (error) {
-      console.error('Error al actualizar estado comunicaciones:', error);
-      Alert.alert('Error', 'No se pudo actualizar el estado');
-    }
-  };
-
-  const handleDelete = async (index: number) => {
-    try {
-      const alumno = alumnos[index];
-      Alert.alert(
-        "Confirmar eliminación",
-        `¿Está seguro de eliminar a ${alumno.nombre}?`,
-        [
-          {
-            text: "Cancelar",
-            style: "cancel"
+        const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
+        
+        const trabajoActual = alumno.trabajos?.[tpNombre] || {
+          completado: false,
+          fecha: new Date().toISOString(),
+          comentario: ''
+        };
+  
+        const nuevoTrabajo = {
+          ...trabajoActual,
+          completado: !trabajoActual.completado,
+          fecha: new Date().toISOString()
+        };
+  
+        await updateDoc(alumnoRef, {
+          [`trabajos.${tpNombre}`]: nuevoTrabajo,
+          updatedAt: serverTimestamp()
+        });
+      } catch (error) {
+        console.error('Error al actualizar TP:', error);
+        Alert.alert('Error', 'No se pudo actualizar el estado del TP');
+      }
+    };
+  
+    const handleTpComentario = async (alumnoIndex: number, tpNombre: string, comentario: string) => {
+      try {
+        const alumno = alumnos[alumnoIndex];
+        const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
+        
+        const trabajoActual = alumno.trabajos[tpNombre] || {
+          completado: false,
+          fecha: new Date().toISOString(),
+          comentario: ''
+        };
+  
+        await updateDoc(alumnoRef, {
+          [`trabajos.${tpNombre}`]: {
+            ...trabajoActual,
+            comentario: comentario
           },
-          {
-            text: "Eliminar",
-            onPress: async () => {
-              const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
-              await deleteDoc(alumnoRef);
+          updatedAt: serverTimestamp()
+        });
+  
+        setShowTpModal(false);
+        setTpComentario('');
+        setSelectedTp(null);
+        setSelectedAlumnoIndex(null);
+      } catch (error) {
+        console.error('Error al actualizar comentario del TP:', error);
+        Alert.alert('Error', 'No se pudo guardar el comentario');
+      }
+    };
+  
+    const handleAgregarTp = async () => {
+      if (!nuevoTp.trim()) {
+        Alert.alert('Error', 'Por favor ingrese un nombre para el TP');
+        return;
+      }
+  
+      if (trabajos.includes(nuevoTp)) {
+        Alert.alert('Error', 'Este TP ya existe');
+        return;
+      }
+  
+      setTrabajos([...trabajos, nuevoTp]);
+      
+      // Actualizar todos los alumnos existentes con el nuevo TP
+      for (const alumno of alumnos) {
+        const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
+        await updateDoc(alumnoRef, {
+          [`trabajos.${nuevoTp}`]: {
+            completado: false,
+            fecha: new Date().toISOString(),
+            comentario: ''
+          },
+          updatedAt: serverTimestamp()
+        });
+      }
+  
+      setNuevoTp('');
+    };
+  
+    const handleComunicacionesChange = async (index: number) => {
+      try {
+        const alumno = alumnos[index];
+        const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
+        await updateDoc(alumnoRef, {
+          comunicaciones: !alumno.comunicaciones,
+          updatedAt: serverTimestamp()
+        });
+      } catch (error) {
+        console.error('Error al actualizar estado comunicaciones:', error);
+        Alert.alert('Error', 'No se pudo actualizar el estado');
+      }
+    };
+  
+    const handleDelete = async (index: number) => {
+      try {
+        const alumno = alumnos[index];
+        Alert.alert(
+          "Confirmar eliminación",
+          `¿Está seguro de eliminar a ${alumno.nombre}?`,
+          [
+            {
+              text: "Cancelar",
+              style: "cancel"
             },
-            style: "destructive"
-          }
-        ]
-      );
-    } catch (error) {
-      console.error('Error al eliminar alumno:', error);
-      Alert.alert('Error', 'No se pudo eliminar el alumno');
-    }
-  };
-
-  const filteredAlumnos = alumnos.filter(alumno =>
-    alumno.nombre.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const toggleMateriasMenu = () => {
-    setShowMateriasMenu(!showMateriasMenu);
-    if (showCursosMenu) setShowCursosMenu(false);
-  };
-
-  const toggleCursosMenu = () => {
-    setShowCursosMenu(!showCursosMenu);
-    if (showMateriasMenu) setShowMateriasMenu(false);
-  };
-
-  const handleCursoChange = (curso: string) => {
-    setSelectedCurso(curso);
-    setSearchQuery('');
-    setShowCursosMenu(false);
-  };
-  const handleAddCurso = async () => {
-    try {
-      if (!cursoToAdd.trim()) {
-        Alert.alert('Error', 'Por favor ingrese un nombre de curso');
-        return;
+            {
+              text: "Eliminar",
+              onPress: async () => {
+                const alumnoRef = doc(db, `cursos/${selectedCurso}/alumnos/${alumno.id}`);
+                await deleteDoc(alumnoRef);
+              },
+              style: "destructive"
+            }
+          ]
+        );
+      } catch (error) {
+        console.error('Error al eliminar alumno:', error);
+        Alert.alert('Error', 'No se pudo eliminar el alumno');
       }
-
-      const cursosRef = collection(db, 'cursos');
-      const q = query(cursosRef, where('nombre', '==', cursoToAdd));
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        Alert.alert('Error', 'Este curso ya existe');
-        return;
+    };
+    const filteredAlumnos = alumnos.filter(alumno =>
+      alumno.nombre.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  
+    const toggleMateriasMenu = () => {
+      setShowMateriasMenu(!showMateriasMenu);
+      if (showCursosMenu) setShowCursosMenu(false);
+    };
+  
+    const toggleCursosMenu = () => {
+      setShowCursosMenu(!showCursosMenu);
+      if (showMateriasMenu) setShowMateriasMenu(false);
+    };
+  
+    const handleCursoChange = (curso: string) => {
+      setSelectedCurso(curso);
+      setSearchQuery('');
+      setShowCursosMenu(false);
+    };
+  
+    const handleAddCurso = async () => {
+      try {
+        if (!cursoToAdd.trim()) {
+          Alert.alert('Error', 'Por favor ingrese un nombre de curso');
+          return;
+        }
+  
+        const cursosRef = collection(db, 'cursos');
+        const q = query(cursosRef, where('nombre', '==', cursoToAdd));
+        const querySnapshot = await getDocs(q);
+  
+        if (!querySnapshot.empty) {
+          Alert.alert('Error', 'Este curso ya existe');
+          return;
+        }
+  
+        const timestamp = serverTimestamp();
+        const cursoData = {
+          nombre: cursoToAdd,
+          createdAt: timestamp,
+          updatedAt: timestamp
+        };
+        
+        await addDoc(cursosRef, cursoData);
+        setCursoToAdd('');
+      } catch (error) {
+        console.error(`Error al agregar curso: ${error}`);
+        Alert.alert('Error', 'No se pudo agregar el curso');
       }
-
-      const timestamp = serverTimestamp();
-      const cursoData = {
-        nombre: cursoToAdd,
-        createdAt: timestamp,
-        updatedAt: timestamp
-      };
-      
-      await addDoc(cursosRef, cursoData);
-      setCursoToAdd('');
-    } catch (error) {
-      console.error(`Error al agregar curso: ${error}`);
-      Alert.alert('Error', 'No se pudo agregar el curso');
-    }
-  };
-
-  const handleAddAlumno = async () => {
-    try {
-      if (!alumnoToAdd.trim()) {
-        Alert.alert('Error', 'Por favor ingrese un nombre de alumno');
-        return;
+    };
+  
+    const handleAddAlumno = async () => {
+      try {
+        if (!alumnoToAdd.trim()) {
+          Alert.alert('Error', 'Por favor ingrese un nombre de alumno');
+          return;
+        }
+  
+        const trabajosIniciales: {
+          [key: string]: {
+            completado: boolean;
+            fecha: string;
+            comentario: string;
+          };
+        } = {};
+  
+        trabajos.forEach(tp => {
+          trabajosIniciales[tp] = {
+            completado: false,
+            fecha: new Date().toISOString(),
+            comentario: ''
+          };
+        });
+  
+        const timestamp = serverTimestamp();
+        const alumnoData = {
+          nombre: alumnoToAdd,
+          comentario: '',
+          aprobado: false,
+          trabajos: trabajosIniciales,
+          comunicaciones: false,
+          createdAt: timestamp,
+          updatedAt: timestamp
+        };
+        
+        const alumnoRef = collection(db, `cursos/${selectedCurso}/alumnos`);
+        await addDoc(alumnoRef, alumnoData);
+        setAlumnoToAdd('');
+      } catch (error) {
+        console.error(`Error al agregar alumno: ${error}`);
+        Alert.alert('Error', 'No se pudo agregar el alumno');
       }
-
-      const timestamp = serverTimestamp();
-      const alumnoData = {
-        nombre: alumnoToAdd,
-        comentario: '',
-        aprobado: false,
-        entregados: false,
-        comunicaciones: false,
-        createdAt: timestamp,
-        updatedAt: timestamp
-      };
-      
-      const alumnoRef = collection(db, `cursos/${selectedCurso}/alumnos`);
-      await addDoc(alumnoRef, alumnoData);
-      setAlumnoToAdd('');
-    } catch (error) {
-      console.error(`Error al agregar alumno: ${error}`);
-      Alert.alert('Error', 'No se pudo agregar el alumno');
-    }
-  };
-
-  return (
-    <View style={styles.container}>
-      <View style={[
-        styles.header,
-        isSmallScreen && styles.headerMobile
-      ]}>
-        <View style={styles.titleContainer}>
-          <Text style={[
-            styles.title,
-            isSmallScreen && styles.titleMobile
-          ]}>Seguimiento de Alumnos</Text>
-        </View>
+    };
+  
+    // Inicio del renderizado
+    return (
+      <View style={styles.container}>
         <View style={[
+          styles.header,
+          isSmallScreen && styles.headerMobile
+        ]}>
+          <View style={styles.titleContainer}>
+            <Text style={[
+              styles.title,
+              isSmallScreen && styles.titleMobile
+            ]}>Seguimiento de Alumnos</Text>
+          </View>
+          <View style={[
           styles.filterContainer,
           isSmallScreen && styles.filterContainerMobile
         ]}>
@@ -347,6 +455,7 @@ const AlumnosScreen: React.FC = () => {
           </View>
         </View>
       </View>
+
       <ScrollView 
         horizontal={isSmallScreen}
         showsHorizontalScrollIndicator={true}
@@ -372,11 +481,10 @@ const AlumnosScreen: React.FC = () => {
               <Text style={[styles.tableHeaderText, isSmallScreen && styles.tableHeaderTextMobile]}>Alumnos</Text>
               <Text style={[styles.tableHeaderText, isSmallScreen && styles.tableHeaderTextMobile]}>Comentario</Text>
               <Text style={[styles.tableHeaderText, isSmallScreen && styles.tableHeaderTextMobile]}>Notas</Text>
-              <Text style={[styles.tableHeaderText, isSmallScreen && styles.tableHeaderTextMobile]}>Trabajos</Text>
+              <Text style={[styles.tableHeaderText, isSmallScreen && styles.tableHeaderTextMobile]}>Trabajos Prácticos</Text>
               <Text style={[styles.tableHeaderText, isSmallScreen && styles.tableHeaderTextMobile]}>Comunicaciones</Text>
               <Text style={[styles.tableHeaderText, isSmallScreen && styles.tableHeaderTextMobile]}>Acciones</Text>
             </View>
-
             <View style={styles.tableBody}>
               <FlatList
                 data={filteredAlumnos}
@@ -406,18 +514,38 @@ const AlumnosScreen: React.FC = () => {
                         {item.aprobado ? 'Aprobado' : 'No Aprobado'}
                       </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity 
-                      style={[
-                        styles.tableRowButton, 
-                        item.entregados && styles.tableRowButtonActive,
-                        isSmallScreen && styles.tableRowButtonMobile
-                      ]} 
-                      onPress={() => handleEntregadosChange(index)}
-                    >
-                      <Text style={[styles.tableRowButtonText, isSmallScreen && styles.tableRowButtonTextMobile]}>
-                        {item.entregados ? 'Entregados' : 'No Entregados'}
-                      </Text>
-                    </TouchableOpacity>
+                    
+                    {/* Sección de Trabajos Prácticos */}
+                    <View style={[styles.trabajosContainer, isSmallScreen && styles.trabajosContainerMobile]}>
+                      {trabajos.map((tp) => (
+                        <View key={tp} style={styles.tpRow}>
+                          <TouchableOpacity 
+                            style={[
+                              styles.tpButton,
+                              (item.trabajos && item.trabajos[tp]?.completado) && styles.tpButtonActive,
+                              isSmallScreen && styles.tpButtonMobile
+                            ]}
+                            onPress={() => handleTpChange(index, tp)}
+                          >
+                            <Text style={styles.tpButtonText}>
+                              {`${tp}: ${item.trabajos && item.trabajos[tp]?.completado ? '✓' : '✗'}`}
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity 
+                            style={styles.tpCommentButton}
+                            onPress={() => {
+                              setSelectedTp(tp);
+                              setSelectedAlumnoIndex(index);
+                              setTpComentario(item.trabajos[tp]?.comentario || '');
+                              setShowTpModal(true);
+                            }}
+                          >
+                            <Text style={styles.tpCommentButtonText}>📝</Text>
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                    </View>
+
                     <TouchableOpacity 
                       style={[
                         styles.tableRowButton, 
@@ -445,6 +573,52 @@ const AlumnosScreen: React.FC = () => {
           </View>
         </View>
       </ScrollView>
+
+      {/* Modal para comentarios de TP */}
+      <Modal
+        visible={showTpModal}
+        transparent={true}
+        animationType="slide"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              {`Comentario para ${selectedTp}`}
+            </Text>
+            <TextInput
+              style={styles.modalInput}
+              multiline={true}
+              numberOfLines={4}
+              value={tpComentario}
+              onChangeText={setTpComentario}
+              placeholder="Escriba un comentario..."
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.modalButtonCancel]}
+                onPress={() => {
+                  setShowTpModal(false);
+                  setTpComentario('');
+                  setSelectedTp(null);
+                  setSelectedAlumnoIndex(null);
+                }}
+              >
+                <Text style={styles.modalButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.modalButtonSave]}
+                onPress={() => {
+                  if (selectedAlumnoIndex !== null && selectedTp) {
+                    handleTpComentario(selectedAlumnoIndex, selectedTp, tpComentario);
+                  }
+                }}
+              >
+                <Text style={styles.modalButtonText}>Guardar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       {showMateriasMenu && (
         <View style={[styles.materiasMenu, isSmallScreen && styles.materiasMenuMobile]}>
           <ScrollView>
@@ -519,6 +693,23 @@ const AlumnosScreen: React.FC = () => {
             placeholder="Nombre del alumno"
             value={alumnoToAdd}
             onChangeText={(text) => setAlumnoToAdd(text)}
+          />
+        </View>
+
+        <View style={[styles.inputGroup, isSmallScreen && styles.inputGroupMobile]}>
+          <TouchableOpacity 
+            style={[styles.button, isSmallScreen && styles.buttonMobile]} 
+            onPress={handleAgregarTp}
+          >
+            <Text style={[styles.buttonText, isSmallScreen && styles.buttonTextMobile]}>
+              Agregar TP
+            </Text>
+          </TouchableOpacity>
+          <TextInput
+            style={[styles.input, isSmallScreen && styles.inputMobile]}
+            placeholder="Nombre del nuevo TP"
+            value={nuevoTp}
+            onChangeText={(text) => setNuevoTp(text)}
           />
         </View>
       </View>
@@ -614,262 +805,342 @@ const styles = StyleSheet.create({
   contentWrapperMobile: {
     minWidth: windowWidth * 2,
   },
-  sectionTitle: {
-    fontSize: fontSize.large,
-    fontWeight: 'bold',
-    marginBottom: padding.medium,
-  },
-  sectionTitleMobile: {
-    fontSize: fontSize.medium,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: padding.medium,
-  },
-  searchInput: {
+  // Nuevos estilos para trabajos prácticos
+  trabajosContainer: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: padding.medium,
-    borderRadius: 5,
-    marginRight: padding.medium,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    fontSize: fontSize.medium,
-  },
-  searchInputMobile: {
-    padding: padding.small,
-    fontSize: fontSize.small,
-  },
-  tableContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    marginBottom: padding.large,
-    padding: padding.medium,
-    minWidth: '100%',
-    elevation: 2,
-  },
-  tableContainerMobile: {
-    padding: padding.small,
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#B2DFEE',
-    padding: padding.medium,
-    marginBottom: padding.medium,
-    borderRadius: 5,
-  },
-  tableHeaderMobile: {
-    padding: padding.small,
-  },
-  tableHeaderText: {
-    flex: 1,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    fontSize: fontSize.medium,
-  },
-  tableHeaderTextMobile: {
-    fontSize: fontSize.small,
-  },
-  tableBody: {
-    marginBottom: padding.medium,
-  },
-  tableRow: {
-    flexDirection: 'row',
-    padding: padding.medium,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    alignItems: 'center',
-  },
-  tableRowMobile: {
-    padding: padding.small,
-  },
-  tableRowText: {
-    flex: 1,
-    fontSize: fontSize.medium,
-  },
-  tableRowTextMobile: {
-    fontSize: fontSize.small,
-  },
-  tableRowInput: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: padding.medium,
-    borderRadius: 5,
+    flexDirection: 'column',
     marginLeft: padding.medium,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    fontSize: fontSize.medium,
-  },
-  tableRowInputMobile: {
     padding: padding.small,
-    marginLeft: padding.small,
-    fontSize: fontSize.small,
   },
-  tableRowButton: {
+  trabajosContainerMobile: {
+    marginLeft: padding.small,
+    padding: padding.small / 2,
+  },
+  tpRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: padding.small,
+  },
+  tpButton: {
     flex: 1,
     backgroundColor: '#E0FFFF',
-    padding: padding.medium,
+    padding: padding.small,
     borderRadius: 5,
-    marginLeft: padding.medium,
+    marginRight: padding.small,
     borderWidth: 1,
     borderColor: '#B2DFEE',
   },
-  tableRowButtonMobile: {
-    padding: padding.small,
-    marginLeft: padding.small,
+  tpButtonMobile: {
+    padding: padding.small / 2,
   },
-  tableRowButtonActive: {
+  tpButtonActive: {
     backgroundColor: '#7FFFD4',
     borderColor: '#4CAF50',
   },
-  tableRowButtonText: {
-    color: '#000000',
+  tpButtonText: {
+    fontSize: fontSize.small,
     textAlign: 'center',
-    fontSize: fontSize.medium,
   },
-  tableRowButtonTextMobile: {
-    fontSize: fontSize.small,
-  },
-  deleteButton: {
-    backgroundColor: '#f44336',
-    padding: padding.medium,
-    borderRadius: 5,
-    marginLeft: padding.medium,
-  },
-  deleteButtonMobile: {
+  tpCommentButton: {
     padding: padding.small,
-    marginLeft: padding.small,
-  },
-  deleteButtonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontSize: fontSize.medium,
-  },
-  deleteButtonTextMobile: {
-    fontSize: fontSize.small,
-  },
-  materiasMenu: {
-    position: 'absolute',
-    top: isSmallDevice ? 120 : 60,
-    right: padding.medium,
-    backgroundColor: '#E0FFFF',
-    padding: padding.medium,
-    borderRadius: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    zIndex: 10,
-    maxHeight: isSmallDevice ? windowHeight * 0.4 : windowHeight * 0.6,
-  },
-  materiasMenuMobile: {
-    right: padding.small,
-    padding: padding.small,
-  },
-  materiaItem: {
-    fontSize: fontSize.medium,
-    paddingVertical: padding.small,
-    color: '#000',
-  },
-  materiaItemMobile: {
-    fontSize: fontSize.small,
-  },
-  cursosMenu: {
-    position: 'absolute',
-    top: isSmallDevice ? 120 : 80,
-    right: isSmallDevice ? padding.medium : 125,
-    backgroundColor: '#E0FFFF',
-    padding: padding.medium,
-    borderRadius: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    zIndex: 10,
-  },
-  cursosMenuMobile: {
-    right: padding.large,
-    padding: padding.small,
-  },
-  cursoItem: {
-    paddingVertical: padding.medium,
-    paddingHorizontal: padding.large,
     borderRadius: 5,
   },
-  cursoItemMobile: {
-    paddingVertical: padding.small,
-    paddingHorizontal: padding.medium,
-  },
-  cursoItemSelected: {
-    backgroundColor: '#7FFFD4',
-  },
-  cursoItemText: {
-    fontSize: fontSize.medium,
-    color: '#000',
-  },
-  cursoItemTextMobile: {
-    fontSize: fontSize.small,
-  },
-  cursoItemTextSelected: {
-    fontWeight: 'bold',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginVertical: padding.large,
-    padding: padding.medium,
-  },
-  buttonContainerMobile: {
-    flexDirection: 'column',
-    padding: padding.small,
-  },
-  inputGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    marginRight: padding.medium,
-  },
-  inputGroupMobile: {
-    marginRight: 0,
-    marginBottom: padding.medium,
-    width: '100%',
-  },
-  button: {
-    backgroundColor: '#4CAF50',
-    padding: padding.medium,
-    borderRadius: 5,
-    marginRight: padding.medium,
-    elevation: 2,
-  },
-  buttonMobile: {
-    padding: padding.small,
-    marginRight: padding.small,
-  },
-  buttonText: {
-    color: '#fff',
+  tpCommentButtonText: {
     fontSize: fontSize.medium,
   },
-  buttonTextMobile: {
-    fontSize: fontSize.small,
-  },
-  input: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: padding.medium,
-    borderRadius: 5,
-    marginRight: padding.medium,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    fontSize: fontSize.medium,
-  },
-  inputMobile: {
-    padding: padding.small,
-    fontSize: fontSize.small,
-  },
-});
-
-export default AlumnosScreen;
+    // Continuación de los estilos
+    modalContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+      backgroundColor: '#fff',
+      padding: padding.large,
+      borderRadius: 10,
+      width: '80%',
+      maxWidth: 500,
+    },
+    modalTitle: {
+      fontSize: fontSize.large,
+      fontWeight: 'bold',
+      marginBottom: padding.medium,
+      textAlign: 'center',
+    },
+    modalInput: {
+      borderWidth: 1,
+      borderColor: '#ddd',
+      borderRadius: 5,
+      padding: padding.medium,
+      marginBottom: padding.medium,
+      textAlignVertical: 'top',
+    },
+    modalButtons: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+    },
+    modalButton: {
+      padding: padding.medium,
+      borderRadius: 5,
+      minWidth: 100,
+    },
+    modalButtonCancel: {
+      backgroundColor: '#ff6b6b',
+    },
+    modalButtonSave: {
+      backgroundColor: '#4CAF50',
+    },
+    modalButtonText: {
+      color: '#fff',
+      textAlign: 'center',
+      fontSize: fontSize.medium,
+    },
+    searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: padding.medium,
+    },
+    searchInput: {
+      flex: 1,
+      backgroundColor: '#fff',
+      padding: padding.medium,
+      borderRadius: 5,
+      marginRight: padding.medium,
+      borderWidth: 1,
+      borderColor: '#ddd',
+      fontSize: fontSize.medium,
+    },
+    searchInputMobile: {
+      padding: padding.small,
+      fontSize: fontSize.small,
+    },
+    tableContainer: {
+      backgroundColor: '#fff',
+      borderRadius: 5,
+      marginBottom: padding.large,
+      padding: padding.medium,
+      minWidth: '100%',
+      elevation: 2,
+    },
+    tableContainerMobile: {
+      padding: padding.small,
+    },
+    tableHeader: {
+      flexDirection: 'row',
+      backgroundColor: '#B2DFEE',
+      padding: padding.medium,
+      marginBottom: padding.medium,
+      borderRadius: 5,
+    },
+    tableHeaderMobile: {
+      padding: padding.small,
+    },
+    tableHeaderText: {
+      flex: 1,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      fontSize: fontSize.medium,
+    },
+    tableHeaderTextMobile: {
+      fontSize: fontSize.small,
+    },
+    tableBody: {
+      marginBottom: padding.medium,
+    },
+    tableRow: {
+      flexDirection: 'row',
+      padding: padding.medium,
+      borderBottomWidth: 1,
+      borderBottomColor: '#ddd',
+      alignItems: 'center',
+    },
+    tableRowMobile: {
+      padding: padding.small,
+    },
+    tableRowText: {
+      flex: 1,
+      fontSize: fontSize.medium,
+    },
+    tableRowTextMobile: {
+      fontSize: fontSize.small,
+    },
+    buttonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginVertical: padding.large,
+      padding: padding.medium,
+    },
+    buttonContainerMobile: {
+      flexDirection: 'column',
+      padding: padding.small,
+    },
+    inputGroup: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+      marginRight: padding.medium,
+    },
+    inputGroupMobile: {
+      marginRight: 0,
+      marginBottom: padding.medium,
+      width: '100%',
+    },
+    button: {
+      backgroundColor: '#4CAF50',
+      padding: padding.medium,
+      borderRadius: 5,
+      marginRight: padding.medium,
+      elevation: 2,
+    },
+    buttonMobile: {
+      padding: padding.small,
+      marginRight: padding.small,
+    },
+    buttonText: {
+      color: '#fff',
+      fontSize: fontSize.medium,
+    },
+    buttonTextMobile: {
+      fontSize: fontSize.small,
+    },
+    input: {
+      flex: 1,
+      backgroundColor: '#fff',
+      padding: padding.medium,
+      borderRadius: 5,
+      marginRight: padding.medium,
+      borderWidth: 1,
+      borderColor: '#ddd',
+      fontSize: fontSize.medium,
+    },
+    inputMobile: {
+      padding: padding.small,
+      fontSize: fontSize.small,
+    },
+    deleteButton: {
+      backgroundColor: '#f44336',
+      padding: padding.medium,
+      borderRadius: 5,
+      marginLeft: padding.medium,
+    },
+    deleteButtonMobile: {
+      padding: padding.small,
+      marginLeft: padding.small,
+    },
+    deleteButtonText: {
+      color: '#fff',
+      textAlign: 'center',
+      fontSize: fontSize.medium,
+    },
+    deleteButtonTextMobile: {
+      fontSize: fontSize.small,
+    },
+    sectionTitle: {
+      fontSize: fontSize.large,
+      fontWeight: 'bold',
+      marginBottom: padding.medium,
+    },
+    sectionTitleMobile: {
+      fontSize: fontSize.medium,
+    },
+    tableRowInput: {
+      flex: 1,
+      backgroundColor: '#fff',
+      padding: padding.medium,
+      borderRadius: 5,
+      marginHorizontal: padding.small,
+      borderWidth: 1,
+      borderColor: '#ddd',
+      fontSize: fontSize.medium,
+    },
+    tableRowInputMobile: {
+      padding: padding.small,
+      fontSize: fontSize.small,
+    },
+    tableRowButton: {
+      flex: 1,
+      backgroundColor: '#E0FFFF',
+      padding: padding.medium,
+      borderRadius: 5,
+      marginHorizontal: padding.small,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    tableRowButtonActive: {
+      backgroundColor: '#7FFFD4',
+    },
+    tableRowButtonMobile: {
+      padding: padding.small,
+    },
+    tableRowButtonText: {
+      fontSize: fontSize.medium,
+      textAlign: 'center',
+    },
+    tableRowButtonTextMobile: {
+      fontSize: fontSize.small,
+    },
+    materiasMenu: {
+      position: 'absolute',
+      top: 100,
+      right: 20,
+      backgroundColor: '#fff',
+      padding: padding.medium,
+      borderRadius: 5,
+      elevation: 4,
+      minWidth: 200,
+    },
+    materiasMenuMobile: {
+      top: 150,
+      right: 10,
+      minWidth: 150,
+    },
+    materiaItem: {
+      padding: padding.medium,
+      fontSize: fontSize.medium,
+      borderBottomWidth: 1,
+      borderBottomColor: '#ddd',
+    },
+    materiaItemMobile: {
+      padding: padding.small,
+      fontSize: fontSize.small,
+    },
+    cursosMenu: {
+      position: 'absolute',
+      top: 100,
+      right: 20,
+      backgroundColor: '#fff',
+      padding: padding.medium,
+      borderRadius: 5,
+      elevation: 4,
+      minWidth: 200,
+    },
+    cursosMenuMobile: {
+      top: 150,
+      right: 10,
+      minWidth: 150,
+    },
+    cursoItem: {
+      padding: padding.medium,
+      borderBottomWidth: 1,
+      borderBottomColor: '#ddd',
+    },
+    cursoItemMobile: {
+      padding: padding.small,
+    },
+    cursoItemSelected: {
+      backgroundColor: '#E0FFFF',
+    },
+    cursoItemText: {
+      fontSize: fontSize.medium,
+    },
+    cursoItemTextMobile: {
+      fontSize: fontSize.small,
+    },
+    cursoItemTextSelected: {
+      fontWeight: 'bold',
+    },
+  });
+  
+  export default AlumnosScreen;
