@@ -11,7 +11,7 @@ import Inicio from "../src/inicio";
 import PadresViewScreen from "../src/Padres/PadresViewScreen";
 import alumnoScreen from "../src/Profesor/profesor";
 import AlumnoScreen from "../src/Alumnos/AlumnoScreen";
-import UserTypeSelection from './screens/UserTypeSelection';
+import UserTypeSelection from '../src/seleccion';
 //import SeleccionRolScreen  from "./RolesNicki";
 
 // Crear navigators
@@ -69,9 +69,27 @@ function MyTabs() {
 // Drawer que envuelve los Tabs
 function MyDrawer() {
   return (
-    <Drawer.Navigator initialRouteName="Iniciar sesión">     
-        <Drawer.Screen name="Iniciar sesión" component={Login} />
-        <Drawer.Screen name="UserTypeSelection" component={UserTypeSelection} />
+    <Drawer.Navigator 
+      initialRouteName="Iniciar sesión"
+      screenOptions={{
+        headerShown: true,
+      }}
+    >     
+        <Drawer.Screen 
+          name="Iniciar sesión" 
+          component={Login} 
+          options={{
+            headerShown: false
+          }}
+        />
+        <Drawer.Screen 
+          name="UserTypeSelection" 
+          component={UserTypeSelection}
+          options={{
+            drawerItemStyle: { display: 'none' },
+            headerTitle: 'Seleccionar Rol'
+          }}
+        />
         <Drawer.Screen name="Inicio" component={Inicio} />
         <Drawer.Screen name="Pantalla del alumno" component={AlumnoScreen} />
         <Drawer.Screen name="Pantalla que ve el padre" component={PadresViewScreen} />

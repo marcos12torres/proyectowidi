@@ -15,9 +15,9 @@ import {
   onAuthStateChanged,
   User
 } from 'firebase/auth';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
 
-const Login = ({ navigation }: { navigation: NativeStackNavigationProp<any> }) => {
+const Login = ({ navigation }: { navigation: DrawerNavigationProp<any> }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [user, setUser] = useState<User | null>(null);
@@ -38,62 +38,24 @@ const Login = ({ navigation }: { navigation: NativeStackNavigationProp<any> }) =
 
   const handleAuthentication = async () => {
     try {
-      console.log('Iniciando autenticación...', { isLogin, email, password });
-      
       if (isLogin) {
-        console.log('Intentando iniciar sesión...');
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        console.log('Login exitoso:', userCredential.user);
         setUser(userCredential.user);
-        
-        // Agregamos un callback al Alert para asegurarnos que la navegación ocurra
-        Alert.alert('Éxito', 'Inicio de sesión exitoso', [
-          {
-            text: 'OK',
-            onPress: () => {
-              console.log('Navegando a UserTypeSelection...');
-              navigation.navigate('UserTypeSelection');
-            }
-          }
-        ]);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'UserTypeSelection' }],
+        });
       } else {
-        console.log('Intentando registrar usuario...');
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        console.log('Registro exitoso:', userCredential.user);
         setUser(userCredential.user);
-        
-        Alert.alert('Éxito', 'Registro exitoso', [
-          {
-            text: 'OK',
-            onPress: () => {
-              console.log('Navegando a UserTypeSelection después del registro...');
-              navigation.navigate('UserTypeSelection');
-            }
-          }
-        ]);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'UserTypeSelection' }],
+        });
       }
     } catch (error: any) {
       console.error('Error en autenticación:', error);
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          Alert.alert('Error', 'Este correo ya está en uso.');
-          break;
-        case 'auth/invalid-email':
-          Alert.alert('Error', 'El correo electrónico no es válido.');
-          break;
-        case 'auth/weak-password':
-          Alert.alert('Error', 'La contraseña es demasiado débil.');
-          break;
-        case 'auth/wrong-password':
-          Alert.alert('Error', 'Contraseña incorrecta.');
-          break;
-        case 'auth/user-not-found':
-          Alert.alert('Error', 'No se encontró el usuario.');
-          break;
-        default:
-          Alert.alert('Error', error.message);
-          break;
-      }
+      Alert.alert('Error', error.message);
     }
   };
 

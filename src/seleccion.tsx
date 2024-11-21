@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Button, StyleSheet } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
 
 type Props = {
-  navigation: NativeStackNavigationProp<any>;
+  navigation: DrawerNavigationProp<any>;
 };
 
 
@@ -13,19 +13,19 @@ const UserTypeSelectionScreen = ({ navigation }: Props) => {
     <View style={styles.container}>
       <Button
         title="Registrarse como Alumno"
-        onPress={() => navigation.navigate('RegistroAlumno')}
+        onPress={() => navigation.navigate('Pantalla del alumno')}
       />
       <Button
         title="Registrarse como Profesor"
-        onPress={() => navigation.navigate('RegistroProfesor')}
+        onPress={() => navigation.navigate('Profesor')}
       />
       <Button
         title="Registrarse como Padre"
-        onPress={() => navigation.navigate('RegistroAlumno')}
+        onPress={() => navigation.navigate('Pantalla que ve el padre')}
       />
-        <Button
+      <Button
         title="Registrarse como asesor"
-        onPress={() => navigation.navigate('RegistroAlumno')}
+        onPress={() => navigation.navigate('Asesor')}
       />
     </View>
   );
