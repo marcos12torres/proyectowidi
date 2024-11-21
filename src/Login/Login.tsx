@@ -7,53 +7,73 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { auth, provider } from '@/app/auth/firebase'; // Asegúrate de que el path sea correcto
+import { auth } from '@/app/auth/firebase'; // Removido provider ya que no usaremos Google Sign-In por ahora
 import { 
-  signInWithRedirect, 
-  getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   User
 } from 'firebase/auth';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-const Login = () => {
+const Login = ({ navigation }: { navigation: NativeStackNavigationProp<any> }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [user, setUser] = useState<User | null>(null);
   const [isLogin, setIsLogin] = useState(true);
 
-  // Maneja el cambio de autenticación en Firebase
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      console.log('Estado de autenticación cambió:', currentUser);
+      if (currentUser) {
+        setUser(currentUser);
       } else {
         setUser(null);
       }
     });
 
-    // Limpiar el listener cuando el componente se desmonte
     return unsubscribe;
   }, []);
 
-  // Maneja el registro o inicio de sesión con email y contraseña
   const handleAuthentication = async () => {
     try {
+      console.log('Iniciando autenticación...', { isLogin, email, password });
+      
       if (isLogin) {
-        // Iniciar sesión con email y contraseña
+        console.log('Intentando iniciar sesión...');
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        console.log('Login exitoso:', userCredential.user);
         setUser(userCredential.user);
-        Alert.alert('Éxito', 'Inicio de sesión exitoso');
+        
+        // Agregamos un callback al Alert para asegurarnos que la navegación ocurra
+        Alert.alert('Éxito', 'Inicio de sesión exitoso', [
+          {
+            text: 'OK',
+            onPress: () => {
+              console.log('Navegando a UserTypeSelection...');
+              navigation.navigate('UserTypeSelection');
+            }
+          }
+        ]);
       } else {
-        // Registrar nuevo usuario
+        console.log('Intentando registrar usuario...');
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        console.log('Registro exitoso:', userCredential.user);
         setUser(userCredential.user);
-        Alert.alert('Éxito', 'Registro exitoso');
+        
+        Alert.alert('Éxito', 'Registro exitoso', [
+          {
+            text: 'OK',
+            onPress: () => {
+              console.log('Navegando a UserTypeSelection después del registro...');
+              navigation.navigate('UserTypeSelection');
+            }
+          }
+        ]);
       }
     } catch (error: any) {
-      // Manejar los errores más comunes
+      console.error('Error en autenticación:', error);
       switch (error.code) {
         case 'auth/email-already-in-use':
           Alert.alert('Error', 'Este correo ya está en uso.');
@@ -77,22 +97,6 @@ const Login = () => {
     }
   };
 
-  // Maneja el inicio de sesión con Google utilizando redirección
-  const handleGoogleLogin = async () => {
-    try {
-      // Usa redirección en lugar de popup
-      await signInWithRedirect(auth, provider);
-      const result = await getRedirectResult(auth); // Obtén el resultado después de la redirección
-      if (result && result.user) {
-        setUser(result.user);
-        Alert.alert('Éxito', 'Inicio de sesión con Google exitoso');
-      }
-    } catch (error: any) {
-      Alert.alert('Error', 'No se pudo iniciar sesión con Google: ' + error.message);
-    }
-  };
-
-  // Cerrar sesión
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -116,7 +120,6 @@ const Login = () => {
         <View style={styles.circle}>
           <Text style={styles.title}>{isLogin ? 'Iniciar Sesión' : 'Registrarse'}</Text>
 
-          {/* Formulario para login con email y contraseña */}
           <TextInput
             style={styles.input}
             value={email}
@@ -137,12 +140,7 @@ const Login = () => {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.toggleText} onPress={() => setIsLogin(!isLogin)}>
-            <Text>{isLogin ? '¿No tienes una cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}</Text>
-          </TouchableOpacity>
-
-          {/* Botón para login con Google */}
-          <TouchableOpacity style={styles.button} onPress={handleGoogleLogin}>
-            <Text style={styles.buttonText}>Iniciar sesión con Google</Text>
+            <Text style={{color: '#fff'}}>{isLogin ? '¿No tienes una cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}</Text>
           </TouchableOpacity>
         </View>
       )}
