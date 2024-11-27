@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { db } from '../auth/firebase';
 
 const Roles: React.FC = () => {
-  const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'about'>('home');
   const [showTeacherModal, setShowTeacherModal] = useState(false);
   const [teacherCode, setTeacherCode] = useState('');
   const [error, setError] = useState('');
@@ -23,7 +23,7 @@ const Roles: React.FC = () => {
       });
 
       if (response.ok) {
-        navigate('/login');
+        setCurrentPage('login'); // Simula la navegación a la página de inicio de sesión
       }
     } catch (error) {
       setError('Error al guardar el rol');
@@ -41,7 +41,7 @@ const Roles: React.FC = () => {
       });
 
       if (response.ok) {
-        navigate('/login');
+        setCurrentPage('login'); // Simula la navegación a la página de inicio de sesión
       } else {
         setError('Código de profesor inválido');
       }
@@ -50,8 +50,17 @@ const Roles: React.FC = () => {
     }
   };
 
-   // Estilos en línea
-   const styles = {
+  // Simulación de diferentes páginas
+  if (currentPage === 'login') {
+    return <div>Bienvenido a la página de inicio de sesión</div>;
+  }
+
+  if (currentPage === 'about') {
+    return <div>Acerca de esta aplicación</div>;
+  }
+
+  // Estilos en línea
+  const styles = {
     container: {
       minHeight: '100vh',
       display: 'flex',
@@ -137,7 +146,7 @@ const Roles: React.FC = () => {
           </button>
 
           <button
-            onClick={() => handleRoleSelection('padre')}
+            onClick={() => setCurrentPage('about')} // Cambia a la página de "about"
             style={styles.button('#8b5cf6', '#7c3aed')}
           >
             Padre

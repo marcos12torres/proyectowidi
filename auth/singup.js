@@ -1,7 +1,7 @@
-//import { createUserWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"
-//import { auth } from "./firebase";
+import { createUserWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"
+import { auth } from "./firebase";
 
-/*
+
 const signupForm = document.querySelector('#signup-form')
 
 signupForm.addEventListener('submit', async (e) => {
@@ -17,4 +17,3 @@ signupForm.addEventListener('submit', async (e) => {
     }
 
 })
-*/
