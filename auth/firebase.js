@@ -12,13 +12,22 @@ import { getFirestore } from 'firebase/firestore';
   appId: "1:709855908187:web:11dbde2c546b1d56d00a7e",
   measurementId: "G-YX4GKTX6FV"
 };*/
-const firebaseConfig = {
+/*const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
+};*/
+const firebaseConfig = {
+  // Tus credenciales de Firebase
+  apiKey: "tu-api-key",
+  authDomain: "tu-auth-domain",
+  projectId: "tu-project-id",
+  storageBucket: "tu-storage-bucket",
+  messagingSenderId: "tu-messaging-sender-id",
+  appId: "tu-app-id"
 };
 
 // Initialize Firebase

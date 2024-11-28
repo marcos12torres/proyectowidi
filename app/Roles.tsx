@@ -9,6 +9,8 @@ import {
   Alert
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../auth/firebase';
 
 const Roles = () => {
   const navigation = useNavigation<any>();
@@ -16,29 +18,52 @@ const Roles = () => {
   const [teacherCode, setTeacherCode] = useState('');
   const [error, setError] = useState('');
 
-  const handleRoleSelect = (role: string) => {
-    switch (role) {
-      case 'alumno':
-        navigation.navigate('Planilla de seguimiento1');
-        break;
-      case 'padre':
-        navigation.navigate('Planilla de seguimiento2');
-        break;
-      case 'profesor':
-        setShowTeacherModal(true); // Mostrar modal en lugar de navegar directamente
-        break;
+   // Función para guardar el usuario en Firebase
+   const saveUserRole = async (role: string) => {
+    try {
+      const userRef = await addDoc(collection(db, 'users'), {
+        role: role,
+        timestamp: new Date(),
+        lastLogin: new Date(),
+        status: 'active'
+      });
+      console.log('Usuario guardado con ID:', userRef.id);
+    } catch (error) {
+      console.error('Error al guardar usuario:', error);
+      Alert.alert('Error', 'No se pudo guardar la información del usuario');
     }
   };
 
-  const handleTeacherCode = () => {
-    // Aquí puedes cambiar '1234' por el código que desees
-    if (teacherCode === '1234') {
-      setShowTeacherModal(false);
-      setTeacherCode('');
-      navigation.navigate('Profesor');
+  const handleRoleSelect = async (role: string) => {
+    if (role === 'profesor') {
+      setShowTeacherModal(true);
+    } else {
+      try {
+        await saveUserRole(role);
+        navigation.navigate(
+          role === 'alumno' ? 'Planilla de seguimiento1' : 'Planilla de seguimiento2'
+        );
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+  };
+
+  const handleTeacherCode = async () => {
+    const TEACHER_CODE = '080924';
+
+    if (teacherCode === TEACHER_CODE) {
+      try {
+        await saveUserRole('profesor');
+        setShowTeacherModal(false);
+        setTeacherCode('');
+        navigation.navigate('Profesor');
+      } catch (error) {
+        console.error('Error:', error);
+        setError('Error al procesar la solicitud');
+      }
     } else {
       setError('Código incorrecto');
-      // Opcional: limpiar el error después de 3 segundos
       setTimeout(() => setError(''), 3000);
     }
   };
