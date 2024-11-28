@@ -8,6 +8,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Dimensions, TouchableOpacity, ImageBackground } from 'react-native';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { Card, Title, Paragraph } from 'react-native-paper';
+import { auth } from '../app/auth/firebase';
 
 const { width } = Dimensions.get('window');
 
