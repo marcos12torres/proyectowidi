@@ -11,6 +11,7 @@ import Inicio from "./inicio";
 import AlumnoViewScreen from "./AlumnosViewScreen";
 import PadresViewScreen from "./PadresViewScreen";
 import alumnoScreen from "./alumnoScreen";
+import Roles from "./Roles";
 
 // Crear navigators
 const Tab = createBottomTabNavigator();
@@ -73,7 +74,7 @@ function MyDrawer() {
         <Drawer.Screen name="Planilla de seguimiento1" component={AlumnoViewScreen} />
         <Drawer.Screen name="Planilla de seguimiento2" component={PadresViewScreen} />
         <Drawer.Screen name="Profesor" component={alumnoScreen} />
-
+        <Drawer.Screen name="Seleccionar Roles" component={Roles} />
     </Drawer.Navigator>
 
   );

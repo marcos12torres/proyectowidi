@@ -1,202 +1,200 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView, Alert } from 'react-native';
-import 'react-native-gesture-handler';
-import { initializeApp } from '@firebase/app';
-import { 
-  getAuth, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  onAuthStateChanged, 
-  signOut 
-} from '@firebase/auth';
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  TextInput,
+  ScrollView,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { Picker } from '@react-native-picker/picker';
 
-// Configuración de Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyA79wvtq3yvfOiPUL1RWRbbeXxXNhkYPBk",
-  authDomain: "widyy-e87ff.firebaseapp.com",
-  projectId: "widyy-e87ff",
-  storageBucket: "widyy-e87ff.appspot.com",
-  messagingSenderId: "205345824552",
-  appId: "1:205345824552:web:4a4e4b26af6a7862973a1d",
-};
-
-// Inicializar Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-// Definición de tipos para los props
-interface AuthScreenProps {
-  email: string;
-  setEmail: React.Dispatch<React.SetStateAction<string>>;
-  password: string;
-  setPassword: React.Dispatch<React.SetStateAction<string>>;
-  isLogin: boolean;
-  setIsLogin: React.Dispatch<React.SetStateAction<boolean>>;
-  handleAuthentication: () => void;
-}
-
-interface AuthenticatedScreenProps {
-  user: { email: string | null };
-  handleLogout: () => void;
-}
-
-// Pantalla de autenticación
-const AuthScreen: React.FC<AuthScreenProps> = ({
-  email,
-  setEmail,
-  password,
-  setPassword,
-  isLogin,
-  setIsLogin,
-  handleAuthentication,
-}) => {
-  return (
-    <View style={styles.authContainer}>
-      <Text style={styles.title}>{isLogin ? 'Sign In' : 'Sign Up'}</Text>
-
-      <TextInput
-        style={styles.input}
-        value={email}
-        onChangeText={setEmail}
-        placeholder="Email"
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        value={password}
-        onChangeText={setPassword}
-        placeholder="Password"
-        secureTextEntry
-      />
-      <View style={styles.buttonContainer}>
-        <Button
-          title={isLogin ? 'Sign In' : 'Sign Up'}
-          onPress={handleAuthentication}
-          color="#3498db"
-        />
-      </View>
-
-      <View style={styles.bottomContainer}>
-        <Text style={styles.toggleText} onPress={() => setIsLogin((prev) => !prev)}>
-          {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Sign In'}
-        </Text>
-      </View>
-    </View>
-  );
-};
-
-// Pantalla para usuario autenticado
-const AuthenticatedScreen: React.FC<AuthenticatedScreenProps> = ({ user, handleLogout }) => (
-  <View style={styles.authContainer}>
-    <Text style={styles.title}>Welcome</Text>
-    <Text style={styles.emailText}>{user.email}</Text>
-    <Button title="Logout" onPress={handleLogout} color="#e74c3c" />
-  </View>
-);
-
-const App: React.FC = () => {
+const Signup = () => {
+  const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [user, setUser] = useState<{ email: string | null } | null>(null);
-  const [isLogin, setIsLogin] = useState(true);
+  const [selectedRole, setSelectedRole] = useState('');
+  const [showTeacherModal, setShowTeacherModal] = useState(false);
+  const [teacherCode, setTeacherCode] = useState('');
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser ? { email: currentUser.email } : null);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const handleAuthentication = async () => {
-    try {
-      if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
-        Alert.alert('Success', 'User signed in successfully!');
-      } else {
-        await createUserWithEmailAndPassword(auth, email, password);
-        Alert.alert('Success', 'User registered successfully!');
-      }
-    } catch (error: any) {
-      Alert.alert('Error', error.message);
+  const handleRoleSelect = (role: string) => {
+    setSelectedRole(role);
+    if (role === 'profesor') {
+      setShowTeacherModal(true);
     }
   };
 
-  const handleLogout = async () => {
+  const handleSignup = async () => {
+    if (!selectedRole) {
+      setError('Por favor seleccione un rol');
+      return;
+    }
+
+    if (selectedRole === 'profesor' && !teacherCode) {
+      setError('Código de profesor requerido');
+      return;
+    }
+
     try {
-      await signOut(auth);
-      Alert.alert('Success', 'User logged out successfully!');
-    } catch (error: any) {
-      Alert.alert('Error', error.message);
+      // Aquí iría la lógica de registro con Firebase
+      console.log('Registrando usuario:', { email, password, selectedRole, teacherCode });
+      navigation.navigate('Iniciar sesión' as never);
+    } catch (error) {
+      setError('Error en el registro');
     }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {user ? (
-        <AuthenticatedScreen user={user} handleLogout={handleLogout} />
-      ) : (
-        <AuthScreen
-          email={email}
-          setEmail={setEmail}
-          password={password}
-          setPassword={setPassword}
-          isLogin={isLogin}
-          setIsLogin={setIsLogin}
-          handleAuthentication={handleAuthentication}
+    <View style={styles.container}>
+      <View style={styles.circle}>
+        <Text style={styles.title}>Registro</Text>
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          placeholderTextColor="#666"
         />
-      )}
-    </ScrollView>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Contraseña"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          placeholderTextColor="#666"
+        />
+
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={selectedRole}
+            onValueChange={handleRoleSelect}
+            style={styles.picker}
+          >
+            <Picker.Item label="Seleccione su rol" value="" />
+            <Picker.Item label="Alumno" value="alumno" />
+            <Picker.Item label="Profesor" value="profesor" />
+            <Picker.Item label="Padre" value="padre" />
+          </Picker>
+        </View>
+
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+        <TouchableOpacity style={styles.button} onPress={handleSignup}>
+          <Text style={styles.buttonText}>Registrarse</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Modal
+        visible={showTeacherModal}
+        transparent={true}
+        animationType="slide"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Código de Profesor</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ingrese el código"
+              value={teacherCode}
+              onChangeText={setTeacherCode}
+              placeholderTextColor="#666"
+            />
+            <TouchableOpacity 
+              style={styles.button}
+              onPress={() => setShowTeacherModal(false)}
+            >
+              <Text style={styles.buttonText}>Confirmar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    justifyContent: 'center',
+    flex: 1,
+    backgroundColor: '#70C5CE',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
   },
-  authContainer: {
-    width: '80%',
-    maxWidth: 400,
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
-    elevation: 3,
+  circle: {
+    width: 450,
+    height: 550, // Aumentado para dar espacio al picker
+    borderRadius: 300,
+    backgroundColor: '#11787D',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
   },
   title: {
     fontSize: 24,
-    marginBottom: 16,
-    textAlign: 'center',
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 20,
   },
   input: {
+    width: 250,
     height: 40,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    marginBottom: 16,
-    padding: 8,
-    borderRadius: 4,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    marginVertical: 10,
   },
-  buttonContainer: {
-    marginBottom: 16,
+  pickerContainer: {
+    width: 250,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    marginVertical: 10,
+    overflow: 'hidden',
   },
-  toggleText: {
-    color: '#3498db',
-    textAlign: 'center',
+  picker: {
+    width: '100%',
+    height: 40,
   },
-  bottomContainer: {
-    marginTop: 20,
+  button: {
+    width: 250,
+    height: 40,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 10,
   },
-  emailText: {
+  buttonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#11787D',
+  },
+  errorText: {
+    color: '#ff0000',
+    marginVertical: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  modalTitle: {
     fontSize: 18,
-    textAlign: 'center',
-    marginBottom: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#11787D',
   },
 });
 
-export default App;
-
-
+export default Signup;
