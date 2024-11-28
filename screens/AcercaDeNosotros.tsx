@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Dimensions, TouchableOpacity, ImageBackground, Modal, TextInput } from 'react-native';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { Card, Title, Paragraph } from 'react-native-paper';
-import { collection, addDoc, deleteDoc, doc, getFirestore, getDocs, query } from 'firebase/firestore';
+import { collection, addDoc, deleteDoc, doc, getFirestore, getDocs, query, updateDoc } from 'firebase/firestore';
 import { app } from '../app/auth/firebase';
 
 const { width } = Dimensions.get('window');
@@ -61,6 +61,18 @@ const AcercaDeNosotros = () => {
   const [modalProyectoVisible, setModalProyectoVisible] = useState(false);
   const [modalCursoVisible, setModalCursoVisible] = useState(false);
 
+  // Estados para edición
+  const [editandoMiembro, setEditandoMiembro] = useState<Miembro | null>(null);
+  const [editandoLogro, setEditandoLogro] = useState<Logro | null>(null);
+  const [editandoProyecto, setEditandoProyecto] = useState<Proyecto | null>(null);
+  const [editandoCurso, setEditandoCurso] = useState<Curso | null>(null);
+  
+  // Estados para modales de edición
+  const [modalEditMiembroVisible, setModalEditMiembroVisible] = useState(false);
+  const [modalEditLogroVisible, setModalEditLogroVisible] = useState(false);
+  const [modalEditProyectoVisible, setModalEditProyectoVisible] = useState(false);
+  const [modalEditCursoVisible, setModalEditCursoVisible] = useState(false);
+
   // Estados para nuevos elementos
   const [nuevoMiembro, setNuevoMiembro] = useState<Miembro>({
     nombre: '',
@@ -86,93 +98,235 @@ const AcercaDeNosotros = () => {
     descripcion: ''
   });
 
-  // Funciones CRUD para equipo directivo
-  const agregarMiembroEquipo = async (miembro: Miembro): Promise<string> => {
+    // Funciones CRUD para equipo directivo
+    const agregarMiembroEquipo = async (miembro: Miembro): Promise<string> => {
+      try {
+        console.log('Intentando agregar miembro:', miembro);
+        const docRef = await addDoc(collection(db, 'equipo'), miembro);
+        console.log('Miembro agregado con ID:', docRef.id);
+        await cargarDatos();
+        return docRef.id;
+      } catch (error) {
+        console.error('Error al agregar miembro:', error);
+        throw error;
+      }
+    };
+  
+    const eliminarMiembroEquipo = async (id: string): Promise<void> => {
+      try {
+        await deleteDoc(doc(db, 'equipo', id));
+        await cargarDatos();
+      } catch (error) {
+        console.error('Error al eliminar miembro:', error);
+        throw error;
+      }
+    };
+  
+    const editarMiembroEquipo = async (id: string, miembroActualizado: Miembro): Promise<void> => {
+      try {
+        await updateDoc(doc(db, 'equipo', id), { ...miembroActualizado });
+        await cargarDatos();
+        setModalEditMiembroVisible(false);
+        setEditandoMiembro(null);
+      } catch (error) {
+        console.error('Error al editar miembro:', error);
+        throw error;
+      }
+    };
+  
+    // Funciones CRUD para logros
+    const agregarLogro = async (logro: Logro): Promise<string> => {
+      try {
+        const docRef = await addDoc(collection(db, 'logros'), logro);
+        await cargarDatos();
+        return docRef.id;
+      } catch (error) {
+        console.error('Error al agregar logro:', error);
+        throw error;
+      }
+    };
+  
+    const eliminarLogro = async (id: string): Promise<void> => {
+      try {
+        await deleteDoc(doc(db, 'logros', id));
+        await cargarDatos();
+      } catch (error) {
+        console.error('Error al eliminar logro:', error);
+        throw error;
+      }
+    };
+  
+    const editarLogro = async (id: string, logroActualizado: Logro): Promise<void> => {
+      try {
+        await updateDoc(doc(db, 'logros', id), { ...logroActualizado });
+        await cargarDatos();
+        setModalEditLogroVisible(false);
+        setEditandoLogro(null);
+      } catch (error) {
+        console.error('Error al editar logro:', error);
+        throw error;
+      }
+    };
+  
+    // Funciones CRUD para proyectos
+    const agregarProyecto = async (proyecto: Proyecto): Promise<string> => {
+      try {
+        const docRef = await addDoc(collection(db, 'proyectos'), proyecto);
+        await cargarDatos();
+        return docRef.id;
+      } catch (error) {
+        console.error('Error al agregar proyecto:', error);
+        throw error;
+      }
+    };
+  
+    const eliminarProyecto = async (id: string): Promise<void> => {
+      try {
+        await deleteDoc(doc(db, 'proyectos', id));
+        await cargarDatos();
+      } catch (error) {
+        console.error('Error al eliminar proyecto:', error);
+        throw error;
+      }
+    };
+  
+    const editarProyecto = async (id: string, proyectoActualizado: Proyecto): Promise<void> => {
+      try {
+        await updateDoc(doc(db, 'proyectos', id), { ...proyectoActualizado });
+        await cargarDatos();
+        setModalEditProyectoVisible(false);
+        setEditandoProyecto(null);
+      } catch (error) {
+        console.error('Error al editar proyecto:', error);
+        throw error;
+      }
+    };
+  
+    // Funciones CRUD para cursos temporales
+    const agregarCurso = async (curso: Curso): Promise<string> => {
+      try {
+        const docRef = await addDoc(collection(db, 'cursosTemporales'), curso);
+        await cargarDatos();
+        return docRef.id;
+      } catch (error) {
+        console.error('Error al agregar curso:', error);
+        throw error;
+      }
+    };
+  
+    const eliminarCurso = async (id: string): Promise<void> => {
+      try {
+        await deleteDoc(doc(db, 'cursosTemporales', id));
+        await cargarDatos();
+      } catch (error) {
+        console.error('Error al eliminar curso:', error);
+        throw error;
+      }
+    };
+  
+    const editarCurso = async (id: string, cursoActualizado: Curso): Promise<void> => {
+      try {
+        await updateDoc(doc(db, 'cursosTemporales', id), { ...cursoActualizado });
+        await cargarDatos();
+        setModalEditCursoVisible(false);
+        setEditandoCurso(null);
+      } catch (error) {
+        console.error('Error al editar curso:', error);
+        throw error;
+      }
+    };
+  // Handlers para los botones
+  const handleAgregarMiembro = async () => {
     try {
-      console.log('Intentando agregar miembro:', miembro);
-      const docRef = await addDoc(collection(db, 'equipo'), miembro);
-      console.log('Miembro agregado con ID:', docRef.id);
-      await cargarDatos();
-      return docRef.id;
+      if (nuevoMiembro.nombre && nuevoMiembro.cargo) {
+        await agregarMiembroEquipo(nuevoMiembro);
+        setModalMiembroVisible(false);
+        setNuevoMiembro({ nombre: '', cargo: '', años: 0 });
+      }
     } catch (error) {
-      console.error('Error al agregar miembro:', error);
-      throw error;
+      console.error('Error:', error);
     }
   };
 
-  const eliminarMiembroEquipo = async (id: string): Promise<void> => {
+  const handleEditarMiembro = async () => {
     try {
-      await deleteDoc(doc(db, 'equipo', id));
-      await cargarDatos();
+      if (editandoMiembro && editandoMiembro.id) {
+        await editarMiembroEquipo(editandoMiembro.id, editandoMiembro);
+      }
     } catch (error) {
-      console.error('Error al eliminar miembro:', error);
-      throw error;
+      console.error('Error:', error);
     }
   };
 
-  // Funciones CRUD para logros
-  const agregarLogro = async (logro: Logro): Promise<string> => {
+  const handleAgregarLogro = async () => {
     try {
-      const docRef = await addDoc(collection(db, 'logros'), logro);
-      await cargarDatos();
-      return docRef.id;
+      if (nuevoLogro.año && nuevoLogro.descripcion) {
+        await agregarLogro(nuevoLogro);
+        setModalLogroVisible(false);
+        setNuevoLogro({ año: '', descripcion: '' });
+      }
     } catch (error) {
-      console.error('Error al agregar logro:', error);
-      throw error;
+      console.error('Error:', error);
     }
   };
 
-  const eliminarLogro = async (id: string): Promise<void> => {
+  const handleEditarLogro = async () => {
     try {
-      await deleteDoc(doc(db, 'logros', id));
-      await cargarDatos();
+      if (editandoLogro && editandoLogro.id) {
+        await editarLogro(editandoLogro.id, editandoLogro);
+      }
     } catch (error) {
-      console.error('Error al eliminar logro:', error);
-      throw error;
+      console.error('Error:', error);
     }
   };
 
-  // Funciones CRUD para proyectos
-  const agregarProyecto = async (proyecto: Proyecto): Promise<string> => {
+  const handleAgregarProyecto = async () => {
     try {
-      const docRef = await addDoc(collection(db, 'proyectos'), proyecto);
-      await cargarDatos();
-      return docRef.id;
+      if (nuevoProyecto.titulo && nuevoProyecto.descripcion) {
+        await agregarProyecto(nuevoProyecto);
+        setModalProyectoVisible(false);
+        setNuevoProyecto({ titulo: '', descripcion: '' });
+      }
     } catch (error) {
-      console.error('Error al agregar proyecto:', error);
-      throw error;
+      console.error('Error:', error);
     }
   };
 
-  const eliminarProyecto = async (id: string): Promise<void> => {
+  const handleEditarProyecto = async () => {
     try {
-      await deleteDoc(doc(db, 'proyectos', id));
-      await cargarDatos();
+      if (editandoProyecto && editandoProyecto.id) {
+        await editarProyecto(editandoProyecto.id, editandoProyecto);
+      }
     } catch (error) {
-      console.error('Error al eliminar proyecto:', error);
-      throw error;
+      console.error('Error:', error);
     }
   };
 
-  // Funciones CRUD para cursos temporales
-  const agregarCurso = async (curso: Curso): Promise<string> => {
+  const handleAgregarCurso = async () => {
     try {
-      const docRef = await addDoc(collection(db, 'cursosTemporales'), curso);
-      await cargarDatos();
-      return docRef.id;
+      if (nuevoCurso.titulo && nuevoCurso.descripcion) {
+        await agregarCurso(nuevoCurso);
+        setModalCursoVisible(false);
+        setNuevoCurso({
+          titulo: '',
+          duracion: '',
+          modalidad: '',
+          horario: '',
+          descripcion: ''
+        });
+      }
     } catch (error) {
-      console.error('Error al agregar curso:', error);
-      throw error;
+      console.error('Error:', error);
     }
   };
 
-  const eliminarCurso = async (id: string): Promise<void> => {
+  const handleEditarCurso = async () => {
     try {
-      await deleteDoc(doc(db, 'cursosTemporales', id));
-      await cargarDatos();
+      if (editandoCurso && editandoCurso.id) {
+        await editarCurso(editandoCurso.id, editandoCurso);
+      }
     } catch (error) {
-      console.error('Error al eliminar curso:', error);
-      throw error;
+      console.error('Error:', error);
     }
   };
 
@@ -226,61 +380,6 @@ const AcercaDeNosotros = () => {
   useEffect(() => {
     console.log('Estado del equipo actualizado:', equipo);
   }, [equipo]);
-
-  // Handlers para los botones
-  const handleAgregarMiembro = async () => {
-    try {
-      if (nuevoMiembro.nombre && nuevoMiembro.cargo) {
-        await agregarMiembroEquipo(nuevoMiembro);
-        setModalMiembroVisible(false);
-        setNuevoMiembro({ nombre: '', cargo: '', años: 0 });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
-  const handleAgregarLogro = async () => {
-    try {
-      if (nuevoLogro.año && nuevoLogro.descripcion) {
-        await agregarLogro(nuevoLogro);
-        setModalLogroVisible(false);
-        setNuevoLogro({ año: '', descripcion: '' });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
-  const handleAgregarProyecto = async () => {
-    try {
-      if (nuevoProyecto.titulo && nuevoProyecto.descripcion) {
-        await agregarProyecto(nuevoProyecto);
-        setModalProyectoVisible(false);
-        setNuevoProyecto({ titulo: '', descripcion: '' });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
-  const handleAgregarCurso = async () => {
-    try {
-      if (nuevoCurso.titulo && nuevoCurso.descripcion) {
-        await agregarCurso(nuevoCurso);
-        setModalCursoVisible(false);
-        setNuevoCurso({
-          titulo: '',
-          duracion: '',
-          modalidad: '',
-          horario: '',
-          descripcion: ''
-        });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
   return (
     <>
       {/* Modal para Agregar Miembro */}
@@ -335,8 +434,63 @@ const AcercaDeNosotros = () => {
         </View>
       </Modal>
 
-      {/* Modal para Agregar Logro */}
+      {/* Modal para Editar Miembro */}
       <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalEditMiembroVisible}
+        onRequestClose={() => setModalEditMiembroVisible(false)}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>Editar Miembro</Text>
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Nombre"
+              value={editandoMiembro?.nombre || ''}
+              onChangeText={(text) => setEditandoMiembro(prev => prev ? {...prev, nombre: text} : null)}
+            />
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Cargo"
+              value={editandoMiembro?.cargo || ''}
+              onChangeText={(text) => setEditandoMiembro(prev => prev ? {...prev, cargo: text} : null)}
+            />
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Años de experiencia"
+              keyboardType="numeric"
+              value={editandoMiembro?.años.toString() || ''}
+              onChangeText={(text) => setEditandoMiembro(prev => prev ? {...prev, años: parseInt(text) || 0} : null)}
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.button, styles.buttonCancel]}
+                onPress={() => {
+                  setModalEditMiembroVisible(false);
+                  setEditandoMiembro(null);
+                }}
+              >
+                <Text style={styles.textStyle}>Cancelar</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.button, styles.buttonConfirm]}
+                onPress={handleEditarMiembro}
+              >
+                <Text style={styles.textStyle}>Guardar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+            {/* Modal para Agregar Logro */}
+            <Modal
         animationType="slide"
         transparent={true}
         visible={modalLogroVisible}
@@ -372,6 +526,55 @@ const AcercaDeNosotros = () => {
               <TouchableOpacity
                 style={[styles.button, styles.buttonConfirm]}
                 onPress={handleAgregarLogro}
+              >
+                <Text style={styles.textStyle}>Guardar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      
+
+      {/* Modal para Editar Logro */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalEditLogroVisible}
+        onRequestClose={() => setModalEditLogroVisible(false)}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>Editar Logro</Text>
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Año"
+              value={editandoLogro?.año || ''}
+              onChangeText={(text) => setEditandoLogro(prev => prev ? {...prev, año: text} : null)}
+            />
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Descripción"
+              value={editandoLogro?.descripcion || ''}
+              onChangeText={(text) => setEditandoLogro(prev => prev ? {...prev, descripcion: text} : null)}
+              multiline
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.button, styles.buttonCancel]}
+                onPress={() => {
+                  setModalEditLogroVisible(false);
+                  setEditandoLogro(null);
+                }}
+              >
+                <Text style={styles.textStyle}>Cancelar</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.button, styles.buttonConfirm]}
+                onPress={handleEditarLogro}
               >
                 <Text style={styles.textStyle}>Guardar</Text>
               </TouchableOpacity>
@@ -425,8 +628,56 @@ const AcercaDeNosotros = () => {
         </View>
       </Modal>
 
-      {/* Modal para Agregar Curso */}
+      {/* Modal para Editar Proyecto */}
       <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalEditProyectoVisible}
+        onRequestClose={() => setModalEditProyectoVisible(false)}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>Editar Proyecto</Text>
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Título"
+              value={editandoProyecto?.titulo || ''}
+              onChangeText={(text) => setEditandoProyecto(prev => prev ? {...prev, titulo: text} : null)}
+            />
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Descripción"
+              value={editandoProyecto?.descripcion || ''}
+              onChangeText={(text) => setEditandoProyecto(prev => prev ? {...prev, descripcion: text} : null)}
+              multiline
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.button, styles.buttonCancel]}
+                onPress={() => {
+                  setModalEditProyectoVisible(false);
+                  setEditandoProyecto(null);
+                }}
+              >
+                <Text style={styles.textStyle}>Cancelar</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.button, styles.buttonConfirm]}
+                onPress={handleEditarProyecto}
+              >
+                <Text style={styles.textStyle}>Guardar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+{/* Modal para Agregar Curso */}
+<Modal
         animationType="slide"
         transparent={true}
         visible={modalCursoVisible}
@@ -490,6 +741,76 @@ const AcercaDeNosotros = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Modal para Editar Curso */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalEditCursoVisible}
+        onRequestClose={() => setModalEditCursoVisible(false)}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>Editar Curso</Text>
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Título"
+              value={editandoCurso?.titulo || ''}
+              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, titulo: text} : null)}
+            />
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Duración"
+              value={editandoCurso?.duracion || ''}
+              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, duracion: text} : null)}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Modalidad"
+              value={editandoCurso?.modalidad || ''}
+              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, modalidad: text} : null)}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Horario"
+              value={editandoCurso?.horario || ''}
+              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, horario: text} : null)}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Descripción"
+              value={editandoCurso?.descripcion || ''}
+              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, descripcion: text} : null)}
+              multiline
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.button, styles.buttonCancel]}
+                onPress={() => {
+                  setModalEditCursoVisible(false);
+                  setEditandoCurso(null);
+                }}
+              >
+                <Text style={styles.textStyle}>Cancelar</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.button, styles.buttonConfirm]}
+                onPress={handleEditarCurso}
+              >
+                <Text style={styles.textStyle}>Guardar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView style={styles.container}>
         {/* Banner Principal */}
         <ImageBackground 
@@ -544,12 +865,23 @@ const AcercaDeNosotros = () => {
                 <Text style={styles.equipoNombre}>{miembro.nombre}</Text>
                 <Text style={styles.equipoCargo}>{miembro.cargo}</Text>
                 <Text style={styles.equipoAños}>{miembro.años} años en la institución</Text>
-                <TouchableOpacity 
-                  style={styles.deleteButton}
-                  onPress={() => eliminarMiembroEquipo(miembro.id!)}
-                >
-                  <MaterialIcons name="delete" size={24} color="red" />
-                </TouchableOpacity>
+                <View style={styles.cardButtons}>
+                  <TouchableOpacity 
+                    style={styles.editButton}
+                    onPress={() => {
+                      setEditandoMiembro(miembro);
+                      setModalEditMiembroVisible(true);
+                    }}
+                  >
+                    <MaterialIcons name="edit" size={24} color="#2ecc71" />
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.deleteButton}
+                    onPress={() => eliminarMiembroEquipo(miembro.id!)}
+                  >
+                    <MaterialIcons name="delete" size={24} color="red" />
+                  </TouchableOpacity>
+                </View>
               </View>
             ))}
           </ScrollView>
@@ -568,18 +900,29 @@ const AcercaDeNosotros = () => {
             <View key={index} style={styles.logroCard}>
               <Text style={styles.logroAño}>{logro.año}</Text>
               <Text style={styles.logroDesc}>{logro.descripcion}</Text>
-              <TouchableOpacity 
-                style={styles.deleteButton}
-                onPress={() => eliminarLogro(logro.id!)}
-              >
-                <MaterialIcons name="delete" size={24} color="red" />
-              </TouchableOpacity>
+              <View style={styles.cardButtons}>
+                <TouchableOpacity 
+                  style={styles.editButton}
+                  onPress={() => {
+                    setEditandoLogro(logro);
+                    setModalEditLogroVisible(true);
+                  }}
+                >
+                  <MaterialIcons name="edit" size={24} color="#2ecc71" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.deleteButton}
+                  onPress={() => eliminarLogro(logro.id!)}
+                >
+                  <MaterialIcons name="delete" size={24} color="red" />
+                </TouchableOpacity>
+              </View>
             </View>
           ))}
         </View>
 
-        {/* Proyectos Actuales */}
-        <View style={styles.section}>
+                {/* Proyectos Actuales */}
+                <View style={styles.section}>
           <Text style={styles.sectionTitle}>Proyectos Actuales</Text>
           <TouchableOpacity 
             style={styles.adminButton}
@@ -588,16 +931,27 @@ const AcercaDeNosotros = () => {
             <Text style={styles.adminButtonText}>Agregar Proyecto</Text>
           </TouchableOpacity>
           {proyectos.map((proyecto, index) => (
-            <TouchableOpacity key={index} style={styles.proyectoCard}>
+            <View key={index} style={styles.proyectoCard}>
               <Text style={styles.proyectoTitle}>{proyecto.titulo}</Text>
               <Text style={styles.proyectoDesc}>{proyecto.descripcion}</Text>
-              <TouchableOpacity 
-                style={styles.deleteButton}
-                onPress={() => eliminarProyecto(proyecto.id!)}
-              >
-                <MaterialIcons name="delete" size={24} color="red" />
-              </TouchableOpacity>
-            </TouchableOpacity>
+              <View style={styles.cardButtons}>
+                <TouchableOpacity 
+                  style={styles.editButton}
+                  onPress={() => {
+                    setEditandoProyecto(proyecto);
+                    setModalEditProyectoVisible(true);
+                  }}
+                >
+                  <MaterialIcons name="edit" size={24} color="#2ecc71" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.deleteButton}
+                  onPress={() => eliminarProyecto(proyecto.id!)}
+                >
+                  <MaterialIcons name="delete" size={24} color="red" />
+                </TouchableOpacity>
+              </View>
+            </View>
           ))}
         </View>
 
@@ -622,12 +976,23 @@ const AcercaDeNosotros = () => {
                 <Text style={styles.cursoDuracion}>Duración: {curso.duracion}</Text>
                 <Text style={styles.cursoHorario}>Horario: {curso.horario}</Text>
                 <Text style={styles.cursoDescripcion}>{curso.descripcion}</Text>
-                <TouchableOpacity 
-                  style={styles.deleteButton}
-                  onPress={() => eliminarCurso(curso.id!)}
-                >
-                  <MaterialIcons name="delete" size={24} color="red" />
-                </TouchableOpacity>
+                <View style={styles.cardButtons}>
+                  <TouchableOpacity 
+                    style={styles.editButton}
+                    onPress={() => {
+                      setEditandoCurso(curso);
+                      setModalEditCursoVisible(true);
+                    }}
+                  >
+                    <MaterialIcons name="edit" size={24} color="#2ecc71" />
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.deleteButton}
+                    onPress={() => eliminarCurso(curso.id!)}
+                  >
+                    <MaterialIcons name="delete" size={24} color="red" />
+                  </TouchableOpacity>
+                </View>
               </View>
             ))}
           </ScrollView>
@@ -669,6 +1034,7 @@ const AcercaDeNosotros = () => {
     </>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -750,6 +1116,17 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'center',
     marginTop: 5,
+  },
+  cardButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 10,
+  },
+  editButton: {
+    padding: 8,
+  },
+  deleteButton: {
+    padding: 8,
   },
   logrosSection: {
     padding: 20,
@@ -924,9 +1301,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 16,
-  },
-  deleteButton: {
-    padding: 8,
   },
   centeredView: {
     flex: 1,
