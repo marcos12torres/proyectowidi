@@ -85,96 +85,98 @@ const AcercaDeNosotros = () => {
     horario: '',
     descripcion: ''
   });
-    // Funciones CRUD para equipo directivo
-    const agregarMiembroEquipo = async (miembro: Miembro): Promise<string> => {
-      try {
-        console.log('Intentando agregar miembro:', miembro);
-        const docRef = await addDoc(collection(db, 'equipo'), miembro);
-        console.log('Miembro agregado con ID:', docRef.id);
-        await cargarDatos();
-        return docRef.id;
-      } catch (error) {
-        console.error('Error al agregar miembro:', error);
-        throw error;
-      }
-    };
-  
-    const eliminarMiembroEquipo = async (id: string): Promise<void> => {
-      try {
-        await deleteDoc(doc(db, 'equipo', id));
-        await cargarDatos();
-      } catch (error) {
-        console.error('Error al eliminar miembro:', error);
-        throw error;
-      }
-    };
-  
-    // Funciones CRUD para logros
-    const agregarLogro = async (logro: Logro): Promise<string> => {
-      try {
-        const docRef = await addDoc(collection(db, 'logros'), logro);
-        await cargarDatos();
-        return docRef.id;
-      } catch (error) {
-        console.error('Error al agregar logro:', error);
-        throw error;
-      }
-    };
-  
-    const eliminarLogro = async (id: string): Promise<void> => {
-      try {
-        await deleteDoc(doc(db, 'logros', id));
-        await cargarDatos();
-      } catch (error) {
-        console.error('Error al eliminar logro:', error);
-        throw error;
-      }
-    };
-  
-    // Funciones CRUD para proyectos
-    const agregarProyecto = async (proyecto: Proyecto): Promise<string> => {
-      try {
-        const docRef = await addDoc(collection(db, 'proyectos'), proyecto);
-        await cargarDatos();
-        return docRef.id;
-      } catch (error) {
-        console.error('Error al agregar proyecto:', error);
-        throw error;
-      }
-    };
-  
-    const eliminarProyecto = async (id: string): Promise<void> => {
-      try {
-        await deleteDoc(doc(db, 'proyectos', id));
-        await cargarDatos();
-      } catch (error) {
-        console.error('Error al eliminar proyecto:', error);
-        throw error;
-      }
-    };
-  
-    // Funciones CRUD para cursos temporales
-    const agregarCurso = async (curso: Curso): Promise<string> => {
-      try {
-        const docRef = await addDoc(collection(db, 'cursosTemporales'), curso);
-        await cargarDatos();
-        return docRef.id;
-      } catch (error) {
-        console.error('Error al agregar curso:', error);
-        throw error;
-      }
-    };
-  
-    const eliminarCurso = async (id: string): Promise<void> => {
-      try {
-        await deleteDoc(doc(db, 'cursosTemporales', id));
-        await cargarDatos();
-      } catch (error) {
-        console.error('Error al eliminar curso:', error);
-        throw error;
-      }
-    };
-      // Función para cargar datos
+
+  // Funciones CRUD para equipo directivo
+  const agregarMiembroEquipo = async (miembro: Miembro): Promise<string> => {
+    try {
+      console.log('Intentando agregar miembro:', miembro);
+      const docRef = await addDoc(collection(db, 'equipo'), miembro);
+      console.log('Miembro agregado con ID:', docRef.id);
+      await cargarDatos();
+      return docRef.id;
+    } catch (error) {
+      console.error('Error al agregar miembro:', error);
+      throw error;
+    }
+  };
+
+  const eliminarMiembroEquipo = async (id: string): Promise<void> => {
+    try {
+      await deleteDoc(doc(db, 'equipo', id));
+      await cargarDatos();
+    } catch (error) {
+      console.error('Error al eliminar miembro:', error);
+      throw error;
+    }
+  };
+
+  // Funciones CRUD para logros
+  const agregarLogro = async (logro: Logro): Promise<string> => {
+    try {
+      const docRef = await addDoc(collection(db, 'logros'), logro);
+      await cargarDatos();
+      return docRef.id;
+    } catch (error) {
+      console.error('Error al agregar logro:', error);
+      throw error;
+    }
+  };
+
+  const eliminarLogro = async (id: string): Promise<void> => {
+    try {
+      await deleteDoc(doc(db, 'logros', id));
+      await cargarDatos();
+    } catch (error) {
+      console.error('Error al eliminar logro:', error);
+      throw error;
+    }
+  };
+
+  // Funciones CRUD para proyectos
+  const agregarProyecto = async (proyecto: Proyecto): Promise<string> => {
+    try {
+      const docRef = await addDoc(collection(db, 'proyectos'), proyecto);
+      await cargarDatos();
+      return docRef.id;
+    } catch (error) {
+      console.error('Error al agregar proyecto:', error);
+      throw error;
+    }
+  };
+
+  const eliminarProyecto = async (id: string): Promise<void> => {
+    try {
+      await deleteDoc(doc(db, 'proyectos', id));
+      await cargarDatos();
+    } catch (error) {
+      console.error('Error al eliminar proyecto:', error);
+      throw error;
+    }
+  };
+
+  // Funciones CRUD para cursos temporales
+  const agregarCurso = async (curso: Curso): Promise<string> => {
+    try {
+      const docRef = await addDoc(collection(db, 'cursosTemporales'), curso);
+      await cargarDatos();
+      return docRef.id;
+    } catch (error) {
+      console.error('Error al agregar curso:', error);
+      throw error;
+    }
+  };
+
+  const eliminarCurso = async (id: string): Promise<void> => {
+    try {
+      await deleteDoc(doc(db, 'cursosTemporales', id));
+      await cargarDatos();
+    } catch (error) {
+      console.error('Error al eliminar curso:', error);
+      throw error;
+    }
+  };
+
+  // Función para cargar datos
   const cargarDatos = async () => {
     try {
       // Cargar equipo
@@ -219,6 +221,11 @@ const AcercaDeNosotros = () => {
   useEffect(() => {
     cargarDatos();
   }, []);
+
+  // Monitorear cambios en el estado del equipo
+  useEffect(() => {
+    console.log('Estado del equipo actualizado:', equipo);
+  }, [equipo]);
 
   // Handlers para los botones
   const handleAgregarMiembro = async () => {
@@ -274,11 +281,6 @@ const AcercaDeNosotros = () => {
       console.error('Error:', error);
     }
   };
-
-  useEffect(() => {
-    console.log('Estado del equipo actualizado:', equipo);
-  }, [equipo]);
-
   return (
     <>
       {/* Modal para Agregar Miembro */}
@@ -377,8 +379,9 @@ const AcercaDeNosotros = () => {
           </View>
         </View>
       </Modal>
-            {/* Modal para Agregar Proyecto */}
-            <Modal
+
+      {/* Modal para Agregar Proyecto */}
+      <Modal
         animationType="slide"
         transparent={true}
         visible={modalProyectoVisible}
@@ -488,35 +491,59 @@ const AcercaDeNosotros = () => {
         </View>
       </Modal>
       <ScrollView style={styles.container}>
-        {/* Información General */}
+        {/* Banner Principal */}
+        <ImageBackground 
+          source={require('../app/img/edificio-escolar.png')} 
+          style={styles.banner}
+        >
+          <View style={styles.overlay}>
+            <Image source={require('../app/img/logo.png')} style={styles.logo} />
+            <Text style={styles.mainTitle}>Nuestra Historia Educativa</Text>
+            <Text style={styles.subTitle}>Formando líderes desde {infoGeneral.añoFundacion}</Text>
+          </View>
+        </ImageBackground>
+
+        {/* Historia y Valores */}
         <View style={styles.infoSection}>
-          <Text style={styles.sectionTitle}>Información General</Text>
-          <Text style={styles.infoText}>Año de Fundación: {infoGeneral.añoFundacion}</Text>
-          <Text style={styles.infoText}>Historia: {infoGeneral.historia}</Text>
-          <Text style={styles.infoText}>Misión: {infoGeneral.mision}</Text>
-          <Text style={styles.infoText}>Visión: {infoGeneral.vision}</Text>
+          <Card style={styles.historiaCard}>
+            <Card.Content style={styles.historiaContent}>
+              <Title style={styles.historiaTitulo}>Nuestra Historia</Title>
+              <Paragraph style={styles.historiaTexto}>{infoGeneral.historia}</Paragraph>
+            </Card.Content>
+          </Card>
+          
+          <View style={styles.valoresContainer}>
+            <Card style={styles.valorCard}>
+              <Card.Content>
+                <Title>Misión</Title>
+                <Paragraph>{infoGeneral.mision}</Paragraph>
+              </Card.Content>
+            </Card>
+            <Card style={styles.valorCard}>
+              <Card.Content>
+                <Title>Visión</Title>
+                <Paragraph>{infoGeneral.vision}</Paragraph>
+              </Card.Content>
+            </Card>
+          </View>
         </View>
 
-        {/* Botones de administración */}
-        <View style={styles.adminSection}>
-          <Text style={styles.sectionTitle}>Administración</Text>
-          
-          {/* Equipo */}
-          <View style={styles.adminGroup}>
-            <Text style={styles.adminGroupTitle}>Equipo Directivo</Text>
-            <TouchableOpacity 
-              style={styles.adminButton}
-              onPress={() => setModalMiembroVisible(true)}
-            >
-              <Text style={styles.adminButtonText}>Agregar Miembro</Text>
-            </TouchableOpacity>
+        {/* Nuestro Equipo */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Nuestro Equipo Directivo</Text>
+          <TouchableOpacity 
+            style={styles.adminButton}
+            onPress={() => setModalMiembroVisible(true)}
+          >
+            <Text style={styles.adminButtonText}>Agregar Miembro</Text>
+          </TouchableOpacity>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {equipo.map((miembro, index) => (
-              <View key={index} style={styles.adminItem}>
-                <View style={styles.itemInfo}>
-                  <Text style={styles.itemTitle}>{miembro.nombre}</Text>
-                  <Text style={styles.itemSubtitle}>{miembro.cargo}</Text>
-                  <Text style={styles.itemDetail}>{miembro.años} años de experiencia</Text>
-                </View>
+              <View key={index} style={styles.equipoCard}>
+                <Image source={require('../app/img/user.png')} style={styles.equipoFoto} />
+                <Text style={styles.equipoNombre}>{miembro.nombre}</Text>
+                <Text style={styles.equipoCargo}>{miembro.cargo}</Text>
+                <Text style={styles.equipoAños}>{miembro.años} años en la institución</Text>
                 <TouchableOpacity 
                   style={styles.deleteButton}
                   onPress={() => eliminarMiembroEquipo(miembro.id!)}
@@ -525,75 +552,76 @@ const AcercaDeNosotros = () => {
                 </TouchableOpacity>
               </View>
             ))}
-          </View>
+          </ScrollView>
+        </View>
 
-          {/* Logros */}
-          <View style={styles.adminGroup}>
-            <Text style={styles.adminGroupTitle}>Logros</Text>
-            <TouchableOpacity 
-              style={styles.adminButton}
-              onPress={() => setModalLogroVisible(true)}
-            >
-              <Text style={styles.adminButtonText}>Agregar Logro</Text>
-            </TouchableOpacity>
-            {logros.map((logro, index) => (
-              <View key={index} style={styles.adminItem}>
-                <View style={styles.itemInfo}>
-                  <Text style={styles.itemTitle}>{logro.año}</Text>
-                  <Text style={styles.itemSubtitle}>{logro.descripcion}</Text>
-                </View>
-                <TouchableOpacity 
-                  style={styles.deleteButton}
-                  onPress={() => eliminarLogro(logro.id!)}
-                >
-                  <MaterialIcons name="delete" size={24} color="red" />
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
+        {/* Logros y Reconocimientos */}
+        <View style={styles.logrosSection}>
+          <Text style={styles.sectionTitle}>Logros y Reconocimientos</Text>
+          <TouchableOpacity 
+            style={styles.adminButton}
+            onPress={() => setModalLogroVisible(true)}
+          >
+            <Text style={styles.adminButtonText}>Agregar Logro</Text>
+          </TouchableOpacity>
+          {logros.map((logro, index) => (
+            <View key={index} style={styles.logroCard}>
+              <Text style={styles.logroAño}>{logro.año}</Text>
+              <Text style={styles.logroDesc}>{logro.descripcion}</Text>
+              <TouchableOpacity 
+                style={styles.deleteButton}
+                onPress={() => eliminarLogro(logro.id!)}
+              >
+                <MaterialIcons name="delete" size={24} color="red" />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
 
-          {/* Proyectos */}
-          <View style={styles.adminGroup}>
-            <Text style={styles.adminGroupTitle}>Proyectos</Text>
-            <TouchableOpacity 
-              style={styles.adminButton}
-              onPress={() => setModalProyectoVisible(true)}
-            >
-              <Text style={styles.adminButtonText}>Agregar Proyecto</Text>
+        {/* Proyectos Actuales */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Proyectos Actuales</Text>
+          <TouchableOpacity 
+            style={styles.adminButton}
+            onPress={() => setModalProyectoVisible(true)}
+          >
+            <Text style={styles.adminButtonText}>Agregar Proyecto</Text>
+          </TouchableOpacity>
+          {proyectos.map((proyecto, index) => (
+            <TouchableOpacity key={index} style={styles.proyectoCard}>
+              <Text style={styles.proyectoTitle}>{proyecto.titulo}</Text>
+              <Text style={styles.proyectoDesc}>{proyecto.descripcion}</Text>
+              <TouchableOpacity 
+                style={styles.deleteButton}
+                onPress={() => eliminarProyecto(proyecto.id!)}
+              >
+                <MaterialIcons name="delete" size={24} color="red" />
+              </TouchableOpacity>
             </TouchableOpacity>
-            {proyectos.map((proyecto, index) => (
-              <View key={index} style={styles.adminItem}>
-                <View style={styles.itemInfo}>
-                  <Text style={styles.itemTitle}>{proyecto.titulo}</Text>
-                  <Text style={styles.itemSubtitle}>{proyecto.descripcion}</Text>
-                </View>
-                <TouchableOpacity 
-                  style={styles.deleteButton}
-                  onPress={() => eliminarProyecto(proyecto.id!)}
-                >
-                  <MaterialIcons name="delete" size={24} color="red" />
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
+          ))}
+        </View>
 
-          {/* Cursos */}
-          <View style={styles.adminGroup}>
-            <Text style={styles.adminGroupTitle}>Cursos Temporales</Text>
-            <TouchableOpacity 
-              style={styles.adminButton}
-              onPress={() => setModalCursoVisible(true)}
-            >
-              <Text style={styles.adminButtonText}>Agregar Curso</Text>
-            </TouchableOpacity>
+        {/* Cursos Temporales */}
+        <View style={styles.cursosSection}>
+          <Text style={styles.sectionTitle}>Cursos Temporales</Text>
+          <TouchableOpacity 
+            style={styles.adminButton}
+            onPress={() => setModalCursoVisible(true)}
+          >
+            <Text style={styles.adminButtonText}>Agregar Curso</Text>
+          </TouchableOpacity>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {cursosTemporales.map((curso, index) => (
-              <View key={index} style={styles.adminItem}>
-                <View style={styles.itemInfo}>
-                  <Text style={styles.itemTitle}>{curso.titulo}</Text>
-                  <Text style={styles.itemSubtitle}>{curso.modalidad} - {curso.duracion}</Text>
-                  <Text style={styles.itemDetail}>{curso.horario}</Text>
-                  <Text style={styles.itemDetail}>{curso.descripcion}</Text>
+              <View key={index} style={styles.cursoCard}>
+                <View style={styles.cursoHeader}>
+                  <Text style={styles.cursoTitulo}>{curso.titulo}</Text>
+                  <View style={styles.modalidadBadge}>
+                    <Text style={styles.modalidadText}>{curso.modalidad}</Text>
+                  </View>
                 </View>
+                <Text style={styles.cursoDuracion}>Duración: {curso.duracion}</Text>
+                <Text style={styles.cursoHorario}>Horario: {curso.horario}</Text>
+                <Text style={styles.cursoDescripcion}>{curso.descripcion}</Text>
                 <TouchableOpacity 
                   style={styles.deleteButton}
                   onPress={() => eliminarCurso(curso.id!)}
@@ -602,58 +630,288 @@ const AcercaDeNosotros = () => {
                 </TouchableOpacity>
               </View>
             ))}
+          </ScrollView>
+        </View>
+
+        {/* Redes Sociales */}
+        <View style={styles.redesSection}>
+          <Text style={styles.sectionTitle}>Síguenos en Redes</Text>
+          <View style={styles.redesContainer}>
+            <TouchableOpacity style={styles.redSocialBtn}>
+              <FontAwesome5 name="facebook" size={24} color="#3b5998" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.redSocialBtn}>
+              <FontAwesome5 name="instagram" size={24} color="#c13584" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.redSocialBtn}>
+              <FontAwesome5 name="twitter" size={24} color="#1da1f2" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Contacto */}
+        <View style={styles.contactSection}>
+          <Text style={styles.sectionTitle}>Contacto</Text>
+          <View style={styles.contactInfo}>
+            <MaterialIcons name="location-on" size={24} color="#2c3e50" />
+            <Text style={styles.contactText}>Av. Principal 123, Ciudad</Text>
+          </View>
+          <View style={styles.contactInfo}>
+            <MaterialIcons name="phone" size={24} color="#2c3e50" />
+            <Text style={styles.contactText}>(123) 456-7890</Text>
+          </View>
+          <View style={styles.contactInfo}>
+            <MaterialIcons name="email" size={24} color="#2c3e50" />
+            <Text style={styles.contactText}>contacto@escuela.edu</Text>
           </View>
         </View>
       </ScrollView>
     </>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
+  },
+  banner: {
+    height: 300,
+    backgroundColor: '#2c3e50',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    marginBottom: 10,
+  },
+  mainTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+  },
+  section: {
+    padding: 20,
   },
   sectionTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
     color: '#2c3e50',
+    marginBottom: 15,
   },
-  infoSection: {
-    padding: 20,
-    backgroundColor: '#f8f9fa',
-    marginBottom: 20,
-  },
-  infoText: {
+  text: {
     fontSize: 16,
-    marginBottom: 10,
-    color: '#2c3e50',
     lineHeight: 24,
+    color: '#34495e',
   },
-  adminSection: {
-    padding: 20,
-    backgroundColor: '#fff',
+  valoresContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 20,
   },
-  adminGroup: {
-    marginBottom: 30,
+  valorCard: {
+    width: width * 0.4,
+    alignItems: 'center',
+    padding: 15,
+  },
+  valorTitle: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  equipoCard: {
+    width: 200,
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 15,
+    marginRight: 15,
+    elevation: 3,
+  },
+  equipoFoto: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    alignSelf: 'center',
+  },
+  equipoNombre: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  equipoCargo: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+  },
+  equipoAños: {
+    fontSize: 12,
+    color: '#999',
+    textAlign: 'center',
+    marginTop: 5,
+  },
+  logrosSection: {
+    padding: 20,
+    backgroundColor: '#f8f9fa',
+  },
+  logroCard: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logroAño: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginRight: 15,
+    color: '#2c3e50',
+  },
+  logroDesc: {
+    fontSize: 14,
+    flex: 1,
+  },
+  proyectoCard: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  proyectoTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  proyectoDesc: {
+    fontSize: 14,
+    color: '#666',
+    flex: 1,
+    marginHorizontal: 10,
+  },
+  redesSection: {
+    padding: 20,
+    backgroundColor: '#f8f9fa',
+  },
+  redesContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 15,
+  },
+  redSocialBtn: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 10,
+    elevation: 3,
+  },
+  contactSection: {
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  contactInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  contactText: {
+    fontSize: 16,
+    marginLeft: 10,
+    color: '#2c3e50',
+  },
+  overlay: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  subTitle: {
+    fontSize: 18,
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 5,
+  },
+  infoSection: {
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  historiaCard: {
+    marginBottom: 20,
+    elevation: 3,
+    backgroundColor: '#fff',
+  },
+  historiaContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  historiaTitulo: {
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  historiaTexto: {
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  cursosSection: {
+    padding: 20,
+    backgroundColor: '#f8f9fa',
+  },
+  cursoCard: {
+    width: 280,
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 15,
+    marginRight: 15,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5,
   },
-  adminGroupTitle: {
-    fontSize: 20,
+  cursoHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  cursoTitulo: {
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 15,
+    color: '#2c3e50',
+    flex: 1,
+  },
+  modalidadBadge: {
+    backgroundColor: '#e3f2fd',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  modalidadText: {
+    color: '#1976d2',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  cursoDuracion: {
+    fontSize: 14,
     color: '#34495e',
+    marginBottom: 5,
+  },
+  cursoHorario: {
+    fontSize: 14,
+    color: '#34495e',
+    marginBottom: 10,
+  },
+  cursoDescripcion: {
+    fontSize: 14,
+    color: '#7f8c8d',
+    marginBottom: 15,
   },
   adminButton: {
     backgroundColor: '#2ecc71',
@@ -667,34 +925,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  adminItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 15,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  itemInfo: {
-    flex: 1,
-    marginRight: 10,
-  },
-  itemTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 5,
-  },
-  itemSubtitle: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    marginBottom: 3,
-  },
-  itemDetail: {
-    fontSize: 12,
-    color: '#95a5a6',
-  },
   deleteButton: {
     padding: 8,
   },
@@ -706,7 +936,6 @@ const styles = StyleSheet.create({
   },
   modalView: {
     width: '90%',
-    maxHeight: '80%',
     backgroundColor: 'white',
     borderRadius: 20,
     padding: 25,
