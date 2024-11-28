@@ -9,8 +9,8 @@ import {
   Alert
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../auth/firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 const Roles = () => {
   const navigation = useNavigation<any>();
@@ -18,34 +18,34 @@ const Roles = () => {
   const [teacherCode, setTeacherCode] = useState('');
   const [error, setError] = useState('');
 
-   // Función para guardar el usuario en Firebase
-   const saveUserRole = async (role: string) => {
+  const saveUserRole = async (role: string) => {
     try {
-      const userRef = await addDoc(collection(db, 'users'), {
+      const docRef = await addDoc(collection(db, 'users'), {
         role: role,
-        timestamp: new Date(),
-        lastLogin: new Date(),
-        status: 'active'
+        timestamp: new Date().toISOString(),
       });
-      console.log('Usuario guardado con ID:', userRef.id);
+      console.log('Usuario guardado con ID:', docRef.id);
     } catch (error) {
-      console.error('Error al guardar usuario:', error);
-      Alert.alert('Error', 'No se pudo guardar la información del usuario');
+      console.error('Error al guardar:', error);
+      Alert.alert('Error', 'No se pudo guardar la información');
     }
   };
 
   const handleRoleSelect = async (role: string) => {
-    if (role === 'profesor') {
-      setShowTeacherModal(true);
-    } else {
-      try {
+    try {
+      if (role === 'profesor') {
+        setShowTeacherModal(true);
+      } else {
         await saveUserRole(role);
-        navigation.navigate(
-          role === 'alumno' ? 'Planilla de seguimiento1' : 'Planilla de seguimiento2'
-        );
-      } catch (error) {
-        console.error('Error:', error);
+        // Asegúrate de que estos nombres coincidan con los de tu Navigator
+        if (role === 'alumno') {
+          navigation.navigate('Planilla de seguimiento1');
+        } else if (role === 'padre') {
+          navigation.navigate('Planilla de seguimiento2');
+        }
       }
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -95,7 +95,6 @@ const Roles = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Modal para código de profesor */}
       <Modal
         visible={showTeacherModal}
         transparent={true}
@@ -137,6 +136,7 @@ const Roles = () => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
