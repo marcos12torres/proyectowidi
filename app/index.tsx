@@ -9,7 +9,7 @@ import AppRouter from './Navigation'; // Asumiendo que este es el enrutador prin
 const IndexScreen: React.FC = () => {
   return (
     <AuthProvider>
-      <NavigationContainer>
+      <NavigationContainer independent={true}>
         <AppRouter />
       </NavigationContainer>
     </AuthProvider>

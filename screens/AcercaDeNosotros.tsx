@@ -144,6 +144,11 @@ const AcercaDeNosotros = () => { //llamando a AcercaDeNosotros.tsx
         ))}
       </View>
 
+      {/* Botón que sale de la ventana lateral */}
+      <TouchableOpacity style={styles.floatingButton}>
+        <Text style={styles.floatingButtonText}>Botón</Text>
+      </TouchableOpacity>
+
       {/* Cursos Temporales */}
       <View style={styles.cursosSection}>
         <Text style={styles.sectionTitle}>Cursos Temporales</Text>
@@ -453,6 +458,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   inscribirseBtnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  floatingButton: {
+    position: 'absolute',
+    right: -20, // Ajusta este valor para que el botón salga de la ventana
+    bottom: 50,
+    backgroundColor: '#2ecc71',
+    padding: 15,
+    borderRadius: 30,
+    elevation: 5,
+  },
+  floatingButtonText: {
     color: '#fff',
     fontWeight: 'bold',
   },

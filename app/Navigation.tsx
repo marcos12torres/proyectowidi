@@ -1,10 +1,9 @@
-
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import * as React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-
+import AcercaDeNosotros from '../screens/AcercaDeNosotros';
 
 //screens
 import Login from "./Login";
@@ -74,7 +73,7 @@ function MyDrawer() {
         <Drawer.Screen name="Planilla de seguimiento1" component={AlumnoViewScreen} />
         <Drawer.Screen name="Planilla de seguimiento2" component={PadresViewScreen} />
         <Drawer.Screen name="Profesor" component={alumnoScreen} />
-
+        <Drawer.Screen name="Acerca de nosotros" component={AcercaDeNosotros} />
 
     </Drawer.Navigator>
 
