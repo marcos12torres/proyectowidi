@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Dimensions, TouchableOpacity, ImageBackground, Modal, TextInput } from 'react-native';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { Card, Title, Paragraph } from 'react-native-paper';
-import { collection, addDoc, deleteDoc, doc, getFirestore, getDocs, query, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, deleteDoc, doc, getFirestore, getDocs, query, updateDoc, orderBy } from 'firebase/firestore';
 import { app } from '../app/auth/firebase';
 
 const { width } = Dimensions.get('window');
@@ -13,6 +13,7 @@ interface Miembro {
   nombre: string;
   cargo: string;
   años: number;
+  createdAt?: string;
 }
 
 interface Logro {
@@ -101,9 +102,10 @@ const AcercaDeNosotros = () => {
     // Funciones CRUD para equipo directivo
     const agregarMiembroEquipo = async (miembro: Miembro): Promise<string> => {
       try {
-        console.log('Intentando agregar miembro:', miembro);
-        const docRef = await addDoc(collection(db, 'equipo'), miembro);
-        console.log('Miembro agregado con ID:', docRef.id);
+        const docRef = await addDoc(collection(db, 'equipo'), {
+          ...miembro,
+          createdAt: new Date().toISOString()
+        });
         await cargarDatos();
         return docRef.id;
       } catch (error) {
@@ -333,14 +335,16 @@ const AcercaDeNosotros = () => {
   // Función para cargar datos
   const cargarDatos = async () => {
     try {
-      // Cargar equipo
-      const equipoQuery = query(collection(db, 'equipo'));
+      // Cargar equipo ordenado por fecha de más nuevo a más viejo
+      const equipoQuery = query(
+        collection(db, 'equipo'),
+        orderBy('createdAt', 'desc')  // Ordenar por fecha descendente
+      );
       const equipoSnapshot = await getDocs(equipoQuery);
       const equipoData = equipoSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       } as unknown as Miembro));
-      console.log('Datos del equipo cargados:', equipoData);
       setEquipo(equipoData);
 
       // Cargar logros
