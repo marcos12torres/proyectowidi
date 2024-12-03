@@ -1,19 +1,24 @@
+// Importaciones de React y componentes básicos de React Native
+//6: se importan  herramientas de Firebase Firestore
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Dimensions, TouchableOpacity, ImageBackground, Modal, TextInput } from 'react-native';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { Card, Title, Paragraph } from 'react-native-paper';
 import { collection, addDoc, deleteDoc, doc, getFirestore, getDocs, query, updateDoc, orderBy } from 'firebase/firestore';
-import { app } from '../app/auth/firebase';
+import { app } from '../app/auth/firebase'; //importa la configuración inicial de Firebase con las credenciales
 
 const { width } = Dimensions.get('window');
+//12: se obtiene la base de datos de Firestore - getFirestore(app): conecta las credenciales de Firebase con Firestore
 const db = getFirestore(app);
 
+//interface / contrato
+
 interface Miembro {
-  id?: string;
-  nombre: string;
-  cargo: string;
-  años: number;
-  createdAt?: string;
+  id?: string; //opcional
+  nombre: string; //obligatorio
+  cargo: string; //obligatorio
+  años: number; //obligatorio
+  createdAt?: string; //opcional
 }
 
 interface Logro {
@@ -43,7 +48,7 @@ interface InfoGeneral {
   mision: string;
   vision: string;
 }
-const AcercaDeNosotros = () => {
+const AcercaDeNosotros = () => { //se crea el componente principal de la pantalla
   // Estados principales
   const [equipo, setEquipo] = useState<Miembro[]>([]);
   const [logros, setLogros] = useState<Logro[]>([]);
