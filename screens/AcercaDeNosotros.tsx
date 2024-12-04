@@ -3,8 +3,8 @@
 //modales: ventanas emergentes
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Dimensions, TouchableOpacity, ImageBackground, Modal, TextInput } from 'react-native';
-import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
-import { Card, Title, Paragraph } from 'react-native-paper';
+import { MaterialIcons } from '@expo/vector-icons';
+
 import { collection, addDoc, deleteDoc, doc, getFirestore, getDocs, query, updateDoc, orderBy } from 'firebase/firestore';
 import { app } from '../app/auth/firebase'; //importa la configuración inicial de Firebase con las credenciales
 
@@ -43,24 +43,14 @@ interface Curso {
   descripcion: string;
 }
 
-interface InfoGeneral {
-  añoFundacion: number;
-  historia: string;
-  mision: string;
-  vision: string;
-}
+
 const AcercaDeNosotros = () => { //se crea el componente principal de la pantalla
   // Estados principales
   const [equipo, setEquipo] = useState<Miembro[]>([]);
   const [logros, setLogros] = useState<Logro[]>([]);
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [cursosTemporales, setCursosTemporales] = useState<Curso[]>([]);
-  const [infoGeneral, setInfoGeneral] = useState<InfoGeneral>({//valores fijos
-    añoFundacion: 1990,
-    historia: 'Cargando...',
-    mision: 'Cargando...',
-    vision: 'Cargando...'
-  });
+
 
   // Estados para modales
   const [modalMiembroVisible, setModalMiembroVisible] = useState(false); //ventana oculta
@@ -862,7 +852,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
           <View style={styles.overlay}> {/* efecto visual - transparencia o color */}
             <Image source={require('../app/img/logo.png')} style={styles.logo} /> {/* imagen dentro del banner */}
             <Text style={styles.mainTitle}>Nuestra Historia Educativa</Text> {/* titulo del banner */}
-            <Text style={styles.subTitle}>Formando líderes desde {infoGeneral.añoFundacion}</Text> {/* subtitulo del banner */}
+            <Text style={styles.subTitle}>Formando líderes desde 1200 A.C</Text> {/* subtitulo del banner */}
           </View>
         </ImageBackground>
 
@@ -1182,27 +1172,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 5,
   },
-  infoSection: {
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  historiaCard: {
-    marginBottom: 20,
-    elevation: 3,
-    backgroundColor: '#fff',
-  },
-  historiaContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  historiaTitulo: {
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  historiaTexto: {
-    textAlign: 'center',
-    lineHeight: 24,
-  },
+
   cursosSection: {
     padding: 20,
     backgroundColor: '#f8f9fa',
