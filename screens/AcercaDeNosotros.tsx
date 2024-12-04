@@ -1019,22 +1019,9 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
 
 
-        {/* Contacto */}
-        <View style={styles.contactSection}>
-          <Text style={styles.sectionTitle}>Contacto</Text>
-          <View style={styles.contactInfo}>
-            <MaterialIcons name="location-on" size={24} color="#2c3e50" />
-            <Text style={styles.contactText}>Av. Principal 123, Ciudad</Text>
-          </View>
-          <View style={styles.contactInfo}>
-            <MaterialIcons name="phone" size={24} color="#2c3e50" />
-            <Text style={styles.contactText}>(123) 456-7890</Text>
-          </View>
-          <View style={styles.contactInfo}>
-            <MaterialIcons name="email" size={24} color="#2c3e50" />
-            <Text style={styles.contactText}>contacto@escuela.edu</Text>
-          </View>
-        </View>
+        {/* saco contacto*/}
+
+
       </ScrollView>
     </>
   );
@@ -1174,34 +1161,10 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 10,
   },
-  redesSection: {
-    padding: 20,
-    backgroundColor: '#f8f9fa',
-  },
-  redesContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 15,
-  },
-  redSocialBtn: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 10,
-    elevation: 3,
-  },
-  contactSection: {
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  contactInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
+
+
+
+
   contactText: {
     fontSize: 16,
     marginLeft: 10,
