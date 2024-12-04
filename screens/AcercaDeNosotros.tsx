@@ -1025,21 +1025,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
           </ScrollView>
         </View>
 
-        {/* Redes Sociales */}
-        <View style={styles.redesSection}>
-          <Text style={styles.sectionTitle}>Síguenos en Redes</Text>
-          <View style={styles.redesContainer}>
-            <TouchableOpacity style={styles.redSocialBtn}>
-              <FontAwesome5 name="facebook" size={24} color="#3b5998" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.redSocialBtn}>
-              <FontAwesome5 name="instagram" size={24} color="#c13584" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.redSocialBtn}>
-              <FontAwesome5 name="twitter" size={24} color="#1da1f2" />
-            </TouchableOpacity>
-          </View>
-        </View>
+
 
         {/* Contacto */}
         <View style={styles.contactSection}>
