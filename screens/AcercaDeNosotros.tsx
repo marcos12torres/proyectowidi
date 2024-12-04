@@ -878,8 +878,8 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
             <Text style={styles.adminButtonText}>Agregar Miembro</Text> {/* texto del boton */}
           </TouchableOpacity>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}> {/* scroll horizontal para mostrar los miembros */}
-            {equipo.map((miembro, index) => ( //map para recorrer el array de miembros
-              <View key={index} style={styles.equipoCard}>
+            {equipo.map((miembro, index) => ( //map para recorrer el array de miembros y genera tarjetas para cada miembro
+              <View key={index} style={styles.equipoCard}> 
                 <Image source={require('../app/img/user.png')} style={styles.equipoFoto} /> {/* imagen del miembro */}
                 <Text style={styles.equipoNombre}>{miembro.nombre}</Text> {/* nombre del miembro */}
                 <Text style={styles.equipoCargo}>{miembro.cargo}</Text> {/* cargo del miembro */}
@@ -983,8 +983,8 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
           >
             <Text style={styles.adminButtonText}>Agregar Curso</Text>
           </TouchableOpacity>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {cursosTemporales.map((curso, index) => (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}> {/* scroll horizontal para mostrar los cursos - se oculta el indicador de desplazamiento*/}
+            {cursosTemporales.map((curso, index) => ( //map para recorrer el array de cursos y genera tarjetas para cada curso
               <View key={index} style={styles.cursoCard}>
                 <View style={styles.cursoHeader}>
                   <Text style={styles.cursoTitulo}>{curso.titulo}</Text>
@@ -1019,13 +1019,12 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
 
 
-        {/* saco contacto*/}
-
-
       </ScrollView>
     </>
   );
 };
+
+//estilos personalizados para los diferentes componentes
 
 const styles = StyleSheet.create({
   container: {
