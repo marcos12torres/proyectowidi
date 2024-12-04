@@ -866,15 +866,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
           </View>
         </ImageBackground>
 
-        {/* Historia y Valores */}
-        <View style={styles.infoSection}> {/* estilos definidos en styles para el contenedor */}
-          <Card style={styles.historiaCard}> {/* estilos definidos en styles para la card - muestra en forma de tarjeta*/}
-            <Card.Content style={styles.historiaContent}> {/* define area interna de la tarjeta y personaliza */}
-              <Title style={styles.historiaTitulo}>Nuestra Historia</Title> {/* titulo de la card */}
-              <Paragraph style={styles.historiaTexto}>{infoGeneral.historia}</Paragraph> {/* parrafo en la tarjeta */}
-            </Card.Content>
-          </Card>
-        </View>
+
 
         {/* Nuestro Equipo */}
         <View style={styles.section}>
