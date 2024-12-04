@@ -1,5 +1,6 @@
 // Importaciones de React y componentes básicos de React Native
 //6: se importan  herramientas de Firebase Firestore
+//modales: ventanas emergentes
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Dimensions, TouchableOpacity, ImageBackground, Modal, TextInput } from 'react-native';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
@@ -54,7 +55,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
   const [logros, setLogros] = useState<Logro[]>([]);
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [cursosTemporales, setCursosTemporales] = useState<Curso[]>([]);
-  const [infoGeneral, setInfoGeneral] = useState<InfoGeneral>({
+  const [infoGeneral, setInfoGeneral] = useState<InfoGeneral>({//valores fijos
     añoFundacion: 1990,
     historia: 'Cargando...',
     mision: 'Cargando...',
@@ -62,12 +63,14 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
   });
 
   // Estados para modales
-  const [modalMiembroVisible, setModalMiembroVisible] = useState(false);
+  const [modalMiembroVisible, setModalMiembroVisible] = useState(false); //ventana oculta
   const [modalLogroVisible, setModalLogroVisible] = useState(false);
   const [modalProyectoVisible, setModalProyectoVisible] = useState(false);
   const [modalCursoVisible, setModalCursoVisible] = useState(false);
 
   // Estados para edición
+  //editandoMiembro: se guarda los datos
+  //setEditandoMiembro: actualiza el estado de editandoMiembro
   const [editandoMiembro, setEditandoMiembro] = useState<Miembro | null>(null);
   const [editandoLogro, setEditandoLogro] = useState<Logro | null>(null);
   const [editandoProyecto, setEditandoProyecto] = useState<Proyecto | null>(null);
@@ -105,21 +108,25 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
   });
 
     // Funciones CRUD para equipo directivo
-    const agregarMiembroEquipo = async (miembro: Miembro): Promise<string> => {
+  
+    const agregarMiembroEquipo = async (miembro: Miembro): Promise<string> => {//promesa: función que devuelve un valor
       try {
         const docRef = await addDoc(collection(db, 'equipo'), {
           ...miembro,
           createdAt: new Date().toISOString()
+         
         });
-        await cargarDatos();
+        await cargarDatos(); //await: espera a que se complete la acción
         return docRef.id;
-      } catch (error) {
+      } catch (error) { 
         console.error('Error al agregar miembro:', error);
         throw error;
       }
     };
-  
-    const eliminarMiembroEquipo = async (id: string): Promise<void> => {
+  //promise<void>: promesa que no devuelve ningún valor - funcion asincrona, si falla, lanza un error
+  //funcion asincrona: se ejecuta en segundo plano, no bloquea la ejecución del programa - operaciones que llevan tiempo
+    const eliminarMiembroEquipo = async (id: string): Promise<void> => { 
+      //id: identificador en formato de texto
       try {
         await deleteDoc(doc(db, 'equipo', id));
         await cargarDatos();
@@ -131,7 +138,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
   
     const editarMiembroEquipo = async (id: string, miembroActualizado: Miembro): Promise<void> => {
       try {
-        await updateDoc(doc(db, 'equipo', id), { ...miembroActualizado });
+        await updateDoc(doc(db, 'equipo', id), { ...miembroActualizado }); //modifica los datos
         await cargarDatos();
         setModalEditMiembroVisible(false);
         setEditandoMiembro(null);
@@ -242,7 +249,11 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
         throw error;
       }
     };
-  // Handlers para los botones
+
+
+  // Handlers para los botones - UI
+  //handleAgregarMiembro: función para agregar un miembro al equipo cuando se presiona el botón de agregar
+  //handle: maneja el evento
   const handleAgregarMiembro = async () => {
     try {
       if (nuevoMiembro.nombre && nuevoMiembro.cargo) {
@@ -337,27 +348,37 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
     }
   };
 
-  // Función para cargar datos
+
+
+
+
+  // Función para cargar datos y actualizar la pantalla
   const cargarDatos = async () => {
     try {
       // Cargar equipo ordenado por fecha de más nuevo a más viejo
+      //equipoQuery = almacena laconsulta a la colección de equipo
+      //query: función para crear una consulta
       const equipoQuery = query(
         collection(db, 'equipo'),
         orderBy('createdAt', 'desc')  // Ordenar por fecha descendente
       );
-      const equipoSnapshot = await getDocs(equipoQuery);
-      const equipoData = equipoSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as unknown as Miembro));
+      const equipoSnapshot = await getDocs(equipoQuery);//equipoSnapshot: contiene los datos de la consulta
+      const equipoData = equipoSnapshot.docs.map(doc => ({//map: recorro los documentos en equipoSnapshot
+        //equipoData: nueva estructura de datos para almacenar los datos de los documentos
+        id: doc.id,//en la estructura de datos se guarda el id de cada documento
+        ...doc.data()//en la estructura de datos se guardan los datos de cada documento
+      } as unknown as Miembro));//as unknown as Miembro: convierte el tipo de dato a Miembro
       setEquipo(equipoData);
 
       // Cargar logros
+      /*se crea una consulta para obtener todos los documentos de la colección logros
+      se recorreran los documentos en logrosSnapshot y se crea una nueva estructura de datos
+      llamada logrosData*/
       const logrosSnapshot = await getDocs(query(collection(db, 'logros')));
       const logrosData = logrosSnapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data()
-      } as unknown as Logro));
+        ...doc.data()//datos de cada documento
+      } as unknown as Logro));//los datos se convierten a Logro
       setLogros(logrosData);
 
       // Cargar proyectos
@@ -380,33 +401,39 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
     }
   };
 
-  // Cargar datos al montar el componente
-  useEffect(() => {
-    cargarDatos();
-  }, []);
+
+
+
+  // Cargar datos al iniciar la pantalla
+  useEffect(() => {//se ejecuta automaticamente llamando a la función cargarDatos
+    cargarDatos(); //obtiene los datos iniciales de la BD para mostrar algo en pantalla
+  }, []);//solo se ejecuta una vez al iniciar la pantalla
 
   // Monitorear cambios en el estado del equipo
   useEffect(() => {
-    console.log('Estado del equipo actualizado:', equipo);
+    console.log('Estado del equipo actualizado:', equipo);//aviso en consola de los cambios
   }, [equipo]);
   return (
     <>
       {/* Modal para Agregar Miembro */}
       <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalMiembroVisible}
-        onRequestClose={() => setModalMiembroVisible(false)}
+        animationType="slide"//tipo de animación deslizante
+        transparent={true}//fondo semitransparente
+        visible={modalMiembroVisible}//control de visibilidad del modal segun el estado
+        onRequestClose={() => setModalMiembroVisible(false)}//onRequestClose: función para cerrar el modal
+        //por si el usuario quiere salir del modal, se cierra
       >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
+        {/* contenedor para centrar el modal */}
+        <View style={styles.centeredView}>  
+          <View style={styles.modalView}>{/* contenedor interno con estilo específico para modal */}
             <Text style={styles.modalTitle}>Agregar Nuevo Miembro</Text>
             
+             {/* campos de entrada */}
             <TextInput
               style={styles.input}
-              placeholder="Nombre"
-              value={nuevoMiembro.nombre}
-              onChangeText={(text) => setNuevoMiembro({...nuevoMiembro, nombre: text})}
+              placeholder="Nombre" //texto temporal hasta que el usuario escriba
+              value={nuevoMiembro.nombre}//actualiza el valor del campo nombre
+              onChangeText={(text) => setNuevoMiembro({...nuevoMiembro, nombre: text})}//actualiza el estado de nuevoMiembro
             />
             
             <TextInput
@@ -424,19 +451,19 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
               onChangeText={(text) => setNuevoMiembro({...nuevoMiembro, años: parseInt(text) || 0})}
             />
 
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.button, styles.buttonCancel]}
-                onPress={() => setModalMiembroVisible(false)}
+            <View style={styles.modalButtons}>{/* contenedor para los botones */}
+              <TouchableOpacity 
+                style={[styles.button, styles.buttonCancel]}//aplico estilos para el botón y encima aplico el estilo cancelar
+                onPress={() => setModalMiembroVisible(false)}//onPress: función para cerrar el modal sin guardar
               >
-                <Text style={styles.textStyle}>Cancelar</Text>
+                <Text style={styles.textStyle}>Cancelar</Text>  {/* texto del botón */}
               </TouchableOpacity>
               
               <TouchableOpacity
-                style={[styles.button, styles.buttonConfirm]}
-                onPress={handleAgregarMiembro}
+                style={[styles.button, styles.buttonConfirm]}//aplico estilos para el botón y encima aplico el estilo guardar
+                onPress={handleAgregarMiembro}//llama a la función handleAgregarMiembro para guardar el miembro
               >
-                <Text style={styles.textStyle}>Guardar</Text>
+                <Text style={styles.textStyle}>Guardar</Text>  {/* texto del botón */}
               </TouchableOpacity>
             </View>
           </View>
@@ -447,8 +474,9 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalEditMiembroVisible}
-        onRequestClose={() => setModalEditMiembroVisible(false)}
+        visible={modalEditMiembroVisible}//control de visibilidad del modal segun el estado
+        onRequestClose={() => setModalEditMiembroVisible(false)}//onRequestClose: función para cerrar el modal
+        //por si el usuario quiere salir del modal, se cierra
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
@@ -457,14 +485,14 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
             <TextInput
               style={styles.input}
               placeholder="Nombre"
-              value={editandoMiembro?.nombre || ''}
-              onChangeText={(text) => setEditandoMiembro(prev => prev ? {...prev, nombre: text} : null)}
+              value={editandoMiembro?.nombre || ''} //actualiza el valor del campo nombre
+              onChangeText={(text) => setEditandoMiembro(prev => prev ? {...prev, nombre: text} : null)} //actualiza el estado de editandoMiembro
             />
             
             <TextInput
               style={styles.input}
               placeholder="Cargo"
-              value={editandoMiembro?.cargo || ''}
+              value={editandoMiembro?.cargo || ''}//se fija si hay nombre, sino se queda en blanco
               onChangeText={(text) => setEditandoMiembro(prev => prev ? {...prev, cargo: text} : null)}
             />
             
@@ -480,18 +508,18 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
               <TouchableOpacity
                 style={[styles.button, styles.buttonCancel]}
                 onPress={() => {
-                  setModalEditMiembroVisible(false);
-                  setEditandoMiembro(null);
+                  setModalEditMiembroVisible(false);//cierra el modal
+                  setEditandoMiembro(null);//si no se esta editando, se queda en null
                 }}
               >
                 <Text style={styles.textStyle}>Cancelar</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
-                style={[styles.button, styles.buttonConfirm]}
-                onPress={handleEditarMiembro}
+                style={[styles.button, styles.buttonConfirm]}//aplico estilos para el botón y encima aplico el estilo guardar
+                onPress={handleEditarMiembro}//llama a la función handleEditarMiembro para guardar el miembro
               >
-                <Text style={styles.textStyle}>Guardar</Text>
+                <Text style={styles.textStyle}>Guardar</Text>  {/* texto del botón */}
               </TouchableOpacity>
             </View>
           </View>
@@ -533,10 +561,10 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
               </TouchableOpacity>
               
               <TouchableOpacity
-                style={[styles.button, styles.buttonConfirm]}
-                onPress={handleAgregarLogro}
+                style={[styles.button, styles.buttonConfirm]}//aplico estilos para el botón y encima aplico el estilo guardar
+                onPress={handleAgregarLogro}//llama a la funcion handleAgregarLogro para guardar el logro
               >
-                <Text style={styles.textStyle}>Guardar</Text>
+                <Text style={styles.textStyle}>Guardar</Text>  {/* texto del botón */}
               </TouchableOpacity>
             </View>
           </View>
@@ -558,8 +586,8 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
             <TextInput
               style={styles.input}
               placeholder="Año"
-              value={editandoLogro?.año || ''}
-              onChangeText={(text) => setEditandoLogro(prev => prev ? {...prev, año: text} : null)}
+              value={editandoLogro?.año || ''}//actualiza el valor del campo año
+              onChangeText={(text) => setEditandoLogro(prev => prev ? {...prev, año: text} : null)}//actualiza el estado de editandoLogro
             />
             
             <TextInput
@@ -820,42 +848,32 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
         </View>
       </Modal>
 
-      <ScrollView style={styles.container}>
+
+
+
+
+
+      <ScrollView style={styles.container}> {/* aplica un estilo definido en styles para el contenedor */}
         {/* Banner Principal */}
-        <ImageBackground 
-          source={require('../app/img/edificio-escolar.png')} 
-          style={styles.banner}
+        <ImageBackground //componente para mostrar una imagen de fondo
+          source={require('../app/img/edificio-escolar.png')} //ruta de la imagen
+          style={styles.banner} //aplica los estilos definidos al contenedor con la imagen de fondo
         >
-          <View style={styles.overlay}>
-            <Image source={require('../app/img/logo.png')} style={styles.logo} />
-            <Text style={styles.mainTitle}>Nuestra Historia Educativa</Text>
-            <Text style={styles.subTitle}>Formando líderes desde {infoGeneral.añoFundacion}</Text>
+          <View style={styles.overlay}> {/* efecto visual - transparencia o color */}
+            <Image source={require('../app/img/logo.png')} style={styles.logo} /> {/* imagen dentro del banner */}
+            <Text style={styles.mainTitle}>Nuestra Historia Educativa</Text> {/* titulo del banner */}
+            <Text style={styles.subTitle}>Formando líderes desde {infoGeneral.añoFundacion}</Text> {/* subtitulo del banner */}
           </View>
         </ImageBackground>
 
         {/* Historia y Valores */}
-        <View style={styles.infoSection}>
-          <Card style={styles.historiaCard}>
-            <Card.Content style={styles.historiaContent}>
-              <Title style={styles.historiaTitulo}>Nuestra Historia</Title>
-              <Paragraph style={styles.historiaTexto}>{infoGeneral.historia}</Paragraph>
+        <View style={styles.infoSection}> {/* estilos definidos en styles para el contenedor */}
+          <Card style={styles.historiaCard}> {/* estilos definidos en styles para la card - muestra en forma de tarjeta*/}
+            <Card.Content style={styles.historiaContent}> {/* define area interna de la tarjeta y personaliza */}
+              <Title style={styles.historiaTitulo}>Nuestra Historia</Title> {/* titulo de la card */}
+              <Paragraph style={styles.historiaTexto}>{infoGeneral.historia}</Paragraph> {/* parrafo en la tarjeta */}
             </Card.Content>
           </Card>
-          
-          <View style={styles.valoresContainer}>
-            <Card style={styles.valorCard}>
-              <Card.Content>
-                <Title>Misión</Title>
-                <Paragraph>{infoGeneral.mision}</Paragraph>
-              </Card.Content>
-            </Card>
-            <Card style={styles.valorCard}>
-              <Card.Content>
-                <Title>Visión</Title>
-                <Paragraph>{infoGeneral.vision}</Paragraph>
-              </Card.Content>
-            </Card>
-          </View>
         </View>
 
         {/* Nuestro Equipo */}
