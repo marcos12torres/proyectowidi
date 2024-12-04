@@ -869,36 +869,36 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
 
         {/* Nuestro Equipo */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Nuestro Equipo Directivo</Text>
+        <View style={styles.section}> {/* inicia el contenedor de la seccion */}
+          <Text style={styles.sectionTitle}>Nuestro Equipo Directivo</Text> {/* titulo de la seccion */}
           <TouchableOpacity 
-            style={styles.adminButton}
-            onPress={() => setModalMiembroVisible(true)}
+            style={styles.adminButton} //boton para agregar un miembro
+            onPress={() => setModalMiembroVisible(true)} //abre el modal para agregar un miembro
           >
-            <Text style={styles.adminButtonText}>Agregar Miembro</Text>
+            <Text style={styles.adminButtonText}>Agregar Miembro</Text> {/* texto del boton */}
           </TouchableOpacity>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {equipo.map((miembro, index) => (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}> {/* scroll horizontal para mostrar los miembros */}
+            {equipo.map((miembro, index) => ( //map para recorrer el array de miembros
               <View key={index} style={styles.equipoCard}>
-                <Image source={require('../app/img/user.png')} style={styles.equipoFoto} />
-                <Text style={styles.equipoNombre}>{miembro.nombre}</Text>
-                <Text style={styles.equipoCargo}>{miembro.cargo}</Text>
-                <Text style={styles.equipoAños}>{miembro.años} años en la institución</Text>
+                <Image source={require('../app/img/user.png')} style={styles.equipoFoto} /> {/* imagen del miembro */}
+                <Text style={styles.equipoNombre}>{miembro.nombre}</Text> {/* nombre del miembro */}
+                <Text style={styles.equipoCargo}>{miembro.cargo}</Text> {/* cargo del miembro */}
+                <Text style={styles.equipoAños}>{miembro.años} años en la institución</Text> {/* años en la institución */}
                 <View style={styles.cardButtons}>
                   <TouchableOpacity 
-                    style={styles.editButton}
+                    style={styles.editButton}//boton para editar
                     onPress={() => {
-                      setEditandoMiembro(miembro);
-                      setModalEditMiembroVisible(true);
+                      setEditandoMiembro(miembro); //actualiza el estado de editandoMiembro
+                      setModalEditMiembroVisible(true); //abre el modal para editar
                     }}
                   >
-                    <MaterialIcons name="edit" size={24} color="#2ecc71" />
+                  <MaterialIcons name="edit" size={24} color="#2ecc71" /> {/* icono de editar */}
                   </TouchableOpacity>
                   <TouchableOpacity 
-                    style={styles.deleteButton}
-                    onPress={() => eliminarMiembroEquipo(miembro.id!)}
+                    style={styles.deleteButton} //boton para eliminar
+                    onPress={() => eliminarMiembroEquipo(miembro.id!)} //funcion para eliminar
                   >
-                    <MaterialIcons name="delete" size={24} color="red" />
+                    <MaterialIcons name="delete" size={24} color="red" /> {/* icono de eliminar */}
                   </TouchableOpacity>
                 </View>
               </View>
