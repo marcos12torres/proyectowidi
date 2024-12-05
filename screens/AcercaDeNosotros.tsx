@@ -74,7 +74,8 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
   const [modalEditProyectoVisible, setModalEditProyectoVisible] = useState(false);
   const [modalEditCursoVisible, setModalEditCursoVisible] = useState(false);
 
-  // Estados para nuevos elementos
+  // Estados para nuevos datos
+  //usestate crea la caja
   const [nuevoMiembro, setNuevoMiembro] = useState<Miembro>({
     nombre: '',
     cargo: '',
@@ -386,8 +387,6 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
       setLogros(logrosData);
 
       // Cargar proyectos
-      //equipoQuery = almacena laconsulta a la colección de equipo
-      //query: función para crear una consulta
       const proyectosSnapshot = await getDocs(query(collection(db, 'proyectos')));
       const proyectosData = proyectosSnapshot.docs.map(doc => ({
         id: doc.id,
@@ -396,8 +395,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
       setProyectos(proyectosData);
 
       // Cargar cursos temporales
-      //equipoQuery = almacena laconsulta a la colección de equipo
-      //query: función para crear una consulta
+     
       const cursosSnapshot = await getDocs(query(collection(db, 'cursosTemporales')));
       const cursosData = cursosSnapshot.docs.map(doc => ({
         id: doc.id,
@@ -447,7 +445,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
             <TextInput
               style={styles.input}
               placeholder="Cargo"
-              value={nuevoMiembro.cargo}
+              value={nuevoMiembro.cargo}//actualiza el valor del campo nombre
               onChangeText={(text) => setNuevoMiembro({...nuevoMiembro, cargo: text})}
             />
             
@@ -556,7 +554,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
               style={styles.input}
               placeholder="Descripción"
               value={nuevoLogro.descripcion}
-              onChangeText={(text) => setNuevoLogro({...nuevoLogro, descripcion: text})}
+              onChangeText={(text) => setNuevoLogro({...nuevoLogro, descripcion: text})}//actualiza el estado
               multiline
             />
 
@@ -594,15 +592,15 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
             <TextInput
               style={styles.input}
               placeholder="Año"
-              value={editandoLogro?.año || ''}//actualiza el valor del campo año
+              value={editandoLogro?.año || ''}//muestra el valor del campo
               onChangeText={(text) => setEditandoLogro(prev => prev ? {...prev, año: text} : null)}//actualiza el estado de editandoLogro
             />
             
             <TextInput
               style={styles.input}
               placeholder="Descripción"
-              value={editandoLogro?.descripcion || ''}
-              onChangeText={(text) => setEditandoLogro(prev => prev ? {...prev, descripcion: text} : null)}//actializa el campo
+              value={editandoLogro?.descripcion || ''}//muestra el valor del campo
+              onChangeText={(text) => setEditandoLogro(prev => prev ? {...prev, descripcion: text} : null)}//verifica y actualiza
               multiline
             />
 
@@ -687,14 +685,14 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
             <TextInput
               style={styles.input}
               placeholder="Título"
-              value={editandoProyecto?.titulo || ''}
+              value={editandoProyecto?.titulo || ''}//muestra el valor del campo
               onChangeText={(text) => setEditandoProyecto(prev => prev ? {...prev, titulo: text} : null)}//actualiza el campo
             />
             
             <TextInput
               style={styles.input}
               placeholder="Descripción"
-              value={editandoProyecto?.descripcion || ''}
+              value={editandoProyecto?.descripcion || ''}//muestra el valor del campo
               onChangeText={(text) => setEditandoProyecto(prev => prev ? {...prev, descripcion: text} : null)}//actualiza el campo
               multiline
             />
@@ -801,35 +799,35 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
             <TextInput
               style={styles.input}
               placeholder="Título"
-              value={editandoCurso?.titulo || ''}
+              value={editandoCurso?.titulo || ''}//muestra el valor del campo
               onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, titulo: text} : null)}//actializa el campo
             />
             
             <TextInput
               style={styles.input}
               placeholder="Duración"
-              value={editandoCurso?.duracion || ''}
+              value={editandoCurso?.duracion || ''}//muestra el valor del campo
               onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, duracion: text} : null)}//actializa el campo
             />
 
             <TextInput
               style={styles.input}
               placeholder="Modalidad"
-              value={editandoCurso?.modalidad || ''}
+              value={editandoCurso?.modalidad || ''}//muestra el valor del campo
               onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, modalidad: text} : null)}//actializa el campo
             />
 
             <TextInput
               style={styles.input}
               placeholder="Horario"
-              value={editandoCurso?.horario || ''}
+              value={editandoCurso?.horario || ''}//muestra el valor del campo
               onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, horario: text} : null)}//actializa el campo
             />
 
             <TextInput
               style={styles.input}
               placeholder="Descripción"
-              value={editandoCurso?.descripcion || ''}
+              value={editandoCurso?.descripcion || ''}//muestra el valor del campo
               onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, descripcion: text} : null)}//actializa el campo
               multiline
             />
@@ -888,7 +886,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
           <ScrollView horizontal showsHorizontalScrollIndicator={false}> {/* scroll horizontal para mostrar los miembros */}
             {equipo.map((miembro, index) => ( //map para recorrer el array de miembros y genera tarjetas para cada miembro
               <View key={index} style={styles.equipoCard}> 
-                <Image source={require('../app/img/user.png')} style={styles.equipoFoto} /> {/* imagen del miembro */}
+                <Image source={require('../app/img/user.png')} style={styles.equipoFoto} /> {/* imagen del miembro del equipo */}
                 <Text style={styles.equipoNombre}>{miembro.nombre}</Text> {/* nombre del miembro */}
                 <Text style={styles.equipoCargo}>{miembro.cargo}</Text> {/* cargo del miembro */}
                 <Text style={styles.equipoAños}>{miembro.años} años en la institución</Text> {/* años en la institución */}
