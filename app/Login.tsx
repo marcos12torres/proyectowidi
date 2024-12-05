@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { auth, provider } from './auth/firebase'; // Asegúrate de que el path sea correcto
+import { auth, provider } from './auth/firebase'; 
 import {
   signInWithPopup,
   getRedirectResult,

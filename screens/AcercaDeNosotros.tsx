@@ -12,7 +12,9 @@ const { width } = Dimensions.get('window');
 //12: se obtiene la base de datos de Firestore - getFirestore(app): conecta las credenciales de Firebase con Firestore
 const db = getFirestore(app);
 
-//interface / contrato
+//definicion de interface para los datos
+//reglas para organizar y verificar los datos de "miembros", "logros", "proyectos" y "cursos"
+
 
 interface Miembro {
   id?: string; //opcional
@@ -45,14 +47,14 @@ interface Curso {
 
 
 const AcercaDeNosotros = () => { //se crea el componente principal de la pantalla
-  // Estados principales
+  // Estados principales individuales
   const [equipo, setEquipo] = useState<Miembro[]>([]);
   const [logros, setLogros] = useState<Logro[]>([]);
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [cursosTemporales, setCursosTemporales] = useState<Curso[]>([]);
 
 
-  // Estados para modales
+  // Estados para modales - visivilidad de los modales
   const [modalMiembroVisible, setModalMiembroVisible] = useState(false); //ventana oculta
   const [modalLogroVisible, setModalLogroVisible] = useState(false);
   const [modalProyectoVisible, setModalProyectoVisible] = useState(false);
@@ -98,6 +100,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
   });
 
     // Funciones CRUD para equipo directivo
+    
   
     const agregarMiembroEquipo = async (miembro: Miembro): Promise<string> => {//promesa: función que devuelve un valor
       try {
@@ -139,6 +142,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
     };
   
     // Funciones CRUD para logros
+    //agregar logro
     const agregarLogro = async (logro: Logro): Promise<string> => {
       try {
         const docRef = await addDoc(collection(db, 'logros'), logro);
@@ -150,6 +154,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
       }
     };
   
+    //espera el ID
     const eliminarLogro = async (id: string): Promise<void> => {
       try {
         await deleteDoc(doc(db, 'logros', id));
@@ -194,6 +199,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
       }
     };
   
+    //espera 2 parametros el ID y los datos actualizados
     const editarProyecto = async (id: string, proyectoActualizado: Proyecto): Promise<void> => {
       try {
         await updateDoc(doc(db, 'proyectos', id), { ...proyectoActualizado });
@@ -227,7 +233,8 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
         throw error;
       }
     };
-  
+
+    //espera 2 parametros el ID y los datos actualizados  
     const editarCurso = async (id: string, cursoActualizado: Curso): Promise<void> => {
       try {
         await updateDoc(doc(db, 'cursosTemporales', id), { ...cursoActualizado });
@@ -249,16 +256,17 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
       if (nuevoMiembro.nombre && nuevoMiembro.cargo) {
         await agregarMiembroEquipo(nuevoMiembro);
         setModalMiembroVisible(false);
-        setNuevoMiembro({ nombre: '', cargo: '', años: 0 });
+        setNuevoMiembro({ nombre: '', cargo: '', años: 0 }); //se vacian los campos
       }
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
+// Handlers para los botones - UI
   const handleEditarMiembro = async () => {
     try {
-      if (editandoMiembro && editandoMiembro.id) {
+      if (editandoMiembro && editandoMiembro.id) {//si tenes los nuevos datos y el ID...
         await editarMiembroEquipo(editandoMiembro.id, editandoMiembro);
       }
     } catch (error) {
@@ -266,21 +274,23 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
     }
   };
 
+  // Handlers para los botones - UI
   const handleAgregarLogro = async () => {
     try {
       if (nuevoLogro.año && nuevoLogro.descripcion) {
         await agregarLogro(nuevoLogro);
         setModalLogroVisible(false);
-        setNuevoLogro({ año: '', descripcion: '' });
+        setNuevoLogro({ año: '', descripcion: '' });//se vacian los campos
       }
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
+  // Handlers para los botones - UI
   const handleEditarLogro = async () => {
     try {
-      if (editandoLogro && editandoLogro.id) {
+      if (editandoLogro && editandoLogro.id) {//si tenes los nuevos datos y el ID...
         await editarLogro(editandoLogro.id, editandoLogro);
       }
     } catch (error) {
@@ -288,21 +298,23 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
     }
   };
 
+  // Handlers para los botones - UI
   const handleAgregarProyecto = async () => {
     try {
       if (nuevoProyecto.titulo && nuevoProyecto.descripcion) {
         await agregarProyecto(nuevoProyecto);
         setModalProyectoVisible(false);
-        setNuevoProyecto({ titulo: '', descripcion: '' });
+        setNuevoProyecto({ titulo: '', descripcion: '' });//se vacian los campos
       }
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
+  // Handlers para los botones - UI
   const handleEditarProyecto = async () => {
     try {
-      if (editandoProyecto && editandoProyecto.id) {
+      if (editandoProyecto && editandoProyecto.id) {//si tenes los nuevos datos y el ID...
         await editarProyecto(editandoProyecto.id, editandoProyecto);
       }
     } catch (error) {
@@ -310,12 +322,13 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
     }
   };
 
+  // Handlers para los botones - UI
   const handleAgregarCurso = async () => {
     try {
       if (nuevoCurso.titulo && nuevoCurso.descripcion) {
         await agregarCurso(nuevoCurso);
         setModalCursoVisible(false);
-        setNuevoCurso({
+        setNuevoCurso({//se vacian los campos
           titulo: '',
           duracion: '',
           modalidad: '',
@@ -330,13 +343,14 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
   const handleEditarCurso = async () => {
     try {
-      if (editandoCurso && editandoCurso.id) {
+      if (editandoCurso && editandoCurso.id) {//si tenes los nuevos datos y el ID...
         await editarCurso(editandoCurso.id, editandoCurso);
       }
     } catch (error) {
       console.error('Error:', error);
     }
   };
+
 
 
 
@@ -372,6 +386,8 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
       setLogros(logrosData);
 
       // Cargar proyectos
+      //equipoQuery = almacena laconsulta a la colección de equipo
+      //query: función para crear una consulta
       const proyectosSnapshot = await getDocs(query(collection(db, 'proyectos')));
       const proyectosData = proyectosSnapshot.docs.map(doc => ({
         id: doc.id,
@@ -380,6 +396,8 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
       setProyectos(proyectosData);
 
       // Cargar cursos temporales
+      //equipoQuery = almacena laconsulta a la colección de equipo
+      //query: función para crear una consulta
       const cursosSnapshot = await getDocs(query(collection(db, 'cursosTemporales')));
       const cursosData = cursosSnapshot.docs.map(doc => ({
         id: doc.id,
@@ -394,7 +412,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
 
 
-  // Cargar datos al iniciar la pantalla
+  // CARGAR DATOS AL INICIAR LA PANTALLA
   useEffect(() => {//se ejecuta automaticamente llamando a la función cargarDatos
     cargarDatos(); //obtiene los datos iniciales de la BD para mostrar algo en pantalla
   }, []);//solo se ejecuta una vez al iniciar la pantalla
@@ -462,7 +480,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
       {/* Modal para Editar Miembro */}
       <Modal
-        animationType="slide"
+        animationType="slide"//tipo de animación deslizante
         transparent={true}
         visible={modalEditMiembroVisible}//control de visibilidad del modal segun el estado
         onRequestClose={() => setModalEditMiembroVisible(false)}//onRequestClose: función para cerrar el modal
@@ -518,9 +536,9 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
             {/* Modal para Agregar Logro */}
             <Modal
-        animationType="slide"
+        animationType="slide"//tipo de animación deslizante
         transparent={true}
-        visible={modalLogroVisible}
+        visible={modalLogroVisible}//control de visibilidad del modal segun el estado
         onRequestClose={() => setModalLogroVisible(false)}
       >
         <View style={styles.centeredView}>
@@ -564,9 +582,9 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
       {/* Modal para Editar Logro */}
       <Modal
-        animationType="slide"
+        animationType="slide"//tipo de animación deslizante
         transparent={true}
-        visible={modalEditLogroVisible}
+        visible={modalEditLogroVisible}//control de visibilidad del modal segun el estado
         onRequestClose={() => setModalEditLogroVisible(false)}
       >
         <View style={styles.centeredView}>
@@ -584,7 +602,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
               style={styles.input}
               placeholder="Descripción"
               value={editandoLogro?.descripcion || ''}
-              onChangeText={(text) => setEditandoLogro(prev => prev ? {...prev, descripcion: text} : null)}
+              onChangeText={(text) => setEditandoLogro(prev => prev ? {...prev, descripcion: text} : null)}//actializa el campo
               multiline
             />
 
@@ -612,9 +630,9 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
       {/* Modal para Agregar Proyecto */}
       <Modal
-        animationType="slide"
+        animationType="slide"//tipo de animación deslizante
         transparent={true}
-        visible={modalProyectoVisible}
+        visible={modalProyectoVisible}//control de visibilidad del modal segun el estado
         onRequestClose={() => setModalProyectoVisible(false)}
       >
         <View style={styles.centeredView}>
@@ -657,9 +675,9 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
       {/* Modal para Editar Proyecto */}
       <Modal
-        animationType="slide"
+        animationType="slide"//tipo de animación deslizante
         transparent={true}
-        visible={modalEditProyectoVisible}
+        visible={modalEditProyectoVisible}//control de visibilidad del modal segun el estado
         onRequestClose={() => setModalEditProyectoVisible(false)}
       >
         <View style={styles.centeredView}>
@@ -670,14 +688,14 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
               style={styles.input}
               placeholder="Título"
               value={editandoProyecto?.titulo || ''}
-              onChangeText={(text) => setEditandoProyecto(prev => prev ? {...prev, titulo: text} : null)}
+              onChangeText={(text) => setEditandoProyecto(prev => prev ? {...prev, titulo: text} : null)}//actualiza el campo
             />
             
             <TextInput
               style={styles.input}
               placeholder="Descripción"
               value={editandoProyecto?.descripcion || ''}
-              onChangeText={(text) => setEditandoProyecto(prev => prev ? {...prev, descripcion: text} : null)}
+              onChangeText={(text) => setEditandoProyecto(prev => prev ? {...prev, descripcion: text} : null)}//actualiza el campo
               multiline
             />
 
@@ -707,7 +725,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 <Modal
         animationType="slide"
         transparent={true}
-        visible={modalCursoVisible}
+        visible={modalCursoVisible}//control de visibilidad del modal segun el estado
         onRequestClose={() => setModalCursoVisible(false)}
       >
         <View style={styles.centeredView}>
@@ -717,35 +735,35 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
             <TextInput
               style={styles.input}
               placeholder="Título"
-              value={nuevoCurso.titulo}
+              value={nuevoCurso.titulo}//valor actual del campo
               onChangeText={(text) => setNuevoCurso({...nuevoCurso, titulo: text})}
             />
             
             <TextInput
               style={styles.input}
               placeholder="Duración"
-              value={nuevoCurso.duracion}
+              value={nuevoCurso.duracion}//valor actual del campo
               onChangeText={(text) => setNuevoCurso({...nuevoCurso, duracion: text})}
             />
 
             <TextInput
               style={styles.input}
               placeholder="Modalidad"
-              value={nuevoCurso.modalidad}
+              value={nuevoCurso.modalidad}//valor actual del campo
               onChangeText={(text) => setNuevoCurso({...nuevoCurso, modalidad: text})}
             />
 
             <TextInput
               style={styles.input}
               placeholder="Horario"
-              value={nuevoCurso.horario}
+              value={nuevoCurso.horario}//valor actual del campo
               onChangeText={(text) => setNuevoCurso({...nuevoCurso, horario: text})}
             />
 
             <TextInput
               style={styles.input}
               placeholder="Descripción"
-              value={nuevoCurso.descripcion}
+              value={nuevoCurso.descripcion}//valor actual del campo
               onChangeText={(text) => setNuevoCurso({...nuevoCurso, descripcion: text})}
               multiline
             />
@@ -773,7 +791,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalEditCursoVisible}
+        visible={modalEditCursoVisible}//control de visibilidad del modal segun el estado
         onRequestClose={() => setModalEditCursoVisible(false)}
       >
         <View style={styles.centeredView}>
@@ -784,35 +802,35 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
               style={styles.input}
               placeholder="Título"
               value={editandoCurso?.titulo || ''}
-              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, titulo: text} : null)}
+              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, titulo: text} : null)}//actializa el campo
             />
             
             <TextInput
               style={styles.input}
               placeholder="Duración"
               value={editandoCurso?.duracion || ''}
-              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, duracion: text} : null)}
+              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, duracion: text} : null)}//actializa el campo
             />
 
             <TextInput
               style={styles.input}
               placeholder="Modalidad"
               value={editandoCurso?.modalidad || ''}
-              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, modalidad: text} : null)}
+              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, modalidad: text} : null)}//actializa el campo
             />
 
             <TextInput
               style={styles.input}
               placeholder="Horario"
               value={editandoCurso?.horario || ''}
-              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, horario: text} : null)}
+              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, horario: text} : null)}//actializa el campo
             />
 
             <TextInput
               style={styles.input}
               placeholder="Descripción"
               value={editandoCurso?.descripcion || ''}
-              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, descripcion: text} : null)}
+              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, descripcion: text} : null)}//actializa el campo
               multiline
             />
 
@@ -842,9 +860,9 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
 
 
-
+      {/* BANNER PRINCIPAL */}
       <ScrollView style={styles.container}> {/* aplica un estilo definido en styles para el contenedor */}
-        {/* Banner Principal */}
+        
         <ImageBackground //componente para mostrar una imagen de fondo
           source={require('../app/img/edificio-escolar.png')} //ruta de la imagen
           style={styles.banner} //aplica los estilos definidos al contenedor con la imagen de fondo
@@ -858,7 +876,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
 
 
-        {/* Nuestro Equipo */}
+        {/*seccion UI  Nuestro Equipo */}
         <View style={styles.section}> {/* inicia el contenedor de la seccion */}
           <Text style={styles.sectionTitle}>Nuestro Equipo Directivo</Text> {/* titulo de la seccion */}
           <TouchableOpacity 
@@ -896,7 +914,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
           </ScrollView>
         </View>
 
-        {/* Logros y Reconocimientos */}
+        {/* seccion UI Logros y Reconocimientos */}
         <View style={styles.logrosSection}>
           <Text style={styles.sectionTitle}>Logros y Reconocimientos</Text>
           <TouchableOpacity 
@@ -930,7 +948,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
           ))}
         </View>
 
-                {/* Proyectos Actuales */}
+                {/* seccion UI Proyectos Actuales */}
                 <View style={styles.section}>
           <Text style={styles.sectionTitle}>Proyectos Actuales</Text>
           <TouchableOpacity 
@@ -964,7 +982,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
           ))}
         </View>
 
-        {/* Cursos Temporales */}
+        {/* seccion UI Cursos Temporales */}
         <View style={styles.cursosSection}>
           <Text style={styles.sectionTitle}>Cursos Temporales</Text>
           <TouchableOpacity 
