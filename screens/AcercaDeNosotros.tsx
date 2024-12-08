@@ -4,17 +4,18 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Dimensions, TouchableOpacity, ImageBackground, Modal, TextInput } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-
 import { collection, addDoc, deleteDoc, doc, getFirestore, getDocs, query, updateDoc, orderBy } from 'firebase/firestore';
 import { app } from '../app/auth/firebase'; //importa la configuración inicial de Firebase con las credenciales
+import { useAdd } from '../app/hooks/useAdd';
+import { useDelete } from '../app/hooks/useDelete';
+import { useUpdate } from '../app/hooks/useUpdate';
+import { useList } from '../app/hooks/useList';
 
 const { width } = Dimensions.get('window');
 //12: se obtiene la base de datos de Firestore - getFirestore(app): conecta las credenciales de Firebase con Firestore
-const db = getFirestore(app);
+const db = getFirestore(app);//inicializa la conexión con Firestore
 
-//definicion de interface para los datos
-//reglas para organizar y verificar los datos de "miembros", "logros", "proyectos" y "cursos"
-
+//interface / contrato
 
 interface Miembro {
   id?: string; //opcional
@@ -47,14 +48,14 @@ interface Curso {
 
 
 const AcercaDeNosotros = () => { //se crea el componente principal de la pantalla
-  // Estados principales individuales
+  // Estados principales
   const [equipo, setEquipo] = useState<Miembro[]>([]);
   const [logros, setLogros] = useState<Logro[]>([]);
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [cursosTemporales, setCursosTemporales] = useState<Curso[]>([]);
 
 
-  // Estados para modales - visivilidad de los modales
+  // Estados para modales
   const [modalMiembroVisible, setModalMiembroVisible] = useState(false); //ventana oculta
   const [modalLogroVisible, setModalLogroVisible] = useState(false);
   const [modalProyectoVisible, setModalProyectoVisible] = useState(false);
@@ -74,8 +75,25 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
   const [modalEditProyectoVisible, setModalEditProyectoVisible] = useState(false);
   const [modalEditCursoVisible, setModalEditCursoVisible] = useState(false);
 
-  // Estados para nuevos datos
-  //usestate crea la caja
+  // Hooks personalizados
+  const { agregarMiembroEquipo, agregarLogro } = useAdd();
+  const { eliminarMiembroEquipo, eliminarLogro } = useDelete();
+  const { editarMiembroEquipo, editarLogro } = useUpdate();
+  const { obtenerEquipo, obtenerLogros } = useList();
+
+  const cargarDatos = async () => {
+    try {
+      const equipoData = await obtenerEquipo();
+      setEquipo(equipoData as Miembro[]);
+
+      const logrosData = await obtenerLogros();
+      setLogros(logrosData as Logro[]);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  // crear estados para nuevos elementos
   const [nuevoMiembro, setNuevoMiembro] = useState<Miembro>({
     nombre: '',
     cargo: '',
@@ -100,155 +118,6 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
     descripcion: ''
   });
 
-    // Funciones CRUD para equipo directivo
-    
-  
-    const agregarMiembroEquipo = async (miembro: Miembro): Promise<string> => {//promesa: función que devuelve un valor
-      try {
-        const docRef = await addDoc(collection(db, 'equipo'), {
-          ...miembro,
-          createdAt: new Date().toISOString()
-         
-        });
-        await cargarDatos(); //await: espera a que se complete la acción
-        return docRef.id;
-      } catch (error) { 
-        console.error('Error al agregar miembro:', error);
-        throw error;
-      }
-    };
-  //promise<void>: promesa que no devuelve ningún valor - funcion asincrona, si falla, lanza un error
-  //funcion asincrona: se ejecuta en segundo plano, no bloquea la ejecución del programa - operaciones que llevan tiempo
-    const eliminarMiembroEquipo = async (id: string): Promise<void> => { 
-      //id: identificador en formato de texto
-      try {
-        await deleteDoc(doc(db, 'equipo', id));
-        await cargarDatos();
-      } catch (error) {
-        console.error('Error al eliminar miembro:', error);
-        throw error;
-      }
-    };
-  
-    const editarMiembroEquipo = async (id: string, miembroActualizado: Miembro): Promise<void> => {
-      try {
-        await updateDoc(doc(db, 'equipo', id), { ...miembroActualizado }); //modifica los datos
-        await cargarDatos();
-        setModalEditMiembroVisible(false);
-        setEditandoMiembro(null);
-      } catch (error) {
-        console.error('Error al editar miembro:', error);
-        throw error;
-      }
-    };
-  
-    // Funciones CRUD para logros
-    //agregar logro
-    const agregarLogro = async (logro: Logro): Promise<string> => {
-      try {
-        const docRef = await addDoc(collection(db, 'logros'), logro);
-        await cargarDatos();
-        return docRef.id;
-      } catch (error) {
-        console.error('Error al agregar logro:', error);
-        throw error;
-      }
-    };
-  
-    //espera el ID
-    const eliminarLogro = async (id: string): Promise<void> => {
-      try {
-        await deleteDoc(doc(db, 'logros', id));
-        await cargarDatos();
-      } catch (error) {
-        console.error('Error al eliminar logro:', error);
-        throw error;
-      }
-    };
-  
-    const editarLogro = async (id: string, logroActualizado: Logro): Promise<void> => {
-      try {
-        await updateDoc(doc(db, 'logros', id), { ...logroActualizado });
-        await cargarDatos();
-        setModalEditLogroVisible(false);
-        setEditandoLogro(null);
-      } catch (error) {
-        console.error('Error al editar logro:', error);
-        throw error;
-      }
-    };
-  
-    // Funciones CRUD para proyectos
-    const agregarProyecto = async (proyecto: Proyecto): Promise<string> => {
-      try {
-        const docRef = await addDoc(collection(db, 'proyectos'), proyecto);
-        await cargarDatos();
-        return docRef.id;
-      } catch (error) {
-        console.error('Error al agregar proyecto:', error);
-        throw error;
-      }
-    };
-  
-    const eliminarProyecto = async (id: string): Promise<void> => {
-      try {
-        await deleteDoc(doc(db, 'proyectos', id));
-        await cargarDatos();
-      } catch (error) {
-        console.error('Error al eliminar proyecto:', error);
-        throw error;
-      }
-    };
-  
-    //espera 2 parametros el ID y los datos actualizados
-    const editarProyecto = async (id: string, proyectoActualizado: Proyecto): Promise<void> => {
-      try {
-        await updateDoc(doc(db, 'proyectos', id), { ...proyectoActualizado });
-        await cargarDatos();
-        setModalEditProyectoVisible(false);
-        setEditandoProyecto(null);
-      } catch (error) {
-        console.error('Error al editar proyecto:', error);
-        throw error;
-      }
-    };
-  
-    // Funciones CRUD para cursos temporales
-    const agregarCurso = async (curso: Curso): Promise<string> => {
-      try {
-        const docRef = await addDoc(collection(db, 'cursosTemporales'), curso);
-        await cargarDatos();
-        return docRef.id;
-      } catch (error) {
-        console.error('Error al agregar curso:', error);
-        throw error;
-      }
-    };
-  
-    const eliminarCurso = async (id: string): Promise<void> => {
-      try {
-        await deleteDoc(doc(db, 'cursosTemporales', id));
-        await cargarDatos();
-      } catch (error) {
-        console.error('Error al eliminar curso:', error);
-        throw error;
-      }
-    };
-
-    //espera 2 parametros el ID y los datos actualizados  
-    const editarCurso = async (id: string, cursoActualizado: Curso): Promise<void> => {
-      try {
-        await updateDoc(doc(db, 'cursosTemporales', id), { ...cursoActualizado });
-        await cargarDatos();
-        setModalEditCursoVisible(false);
-        setEditandoCurso(null);
-      } catch (error) {
-        console.error('Error al editar curso:', error);
-        throw error;
-      }
-    };
-
-
   // Handlers para los botones - UI
   //handleAgregarMiembro: función para agregar un miembro al equipo cuando se presiona el botón de agregar
   //handle: maneja el evento
@@ -257,41 +126,38 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
       if (nuevoMiembro.nombre && nuevoMiembro.cargo) {
         await agregarMiembroEquipo(nuevoMiembro);
         setModalMiembroVisible(false);
-        setNuevoMiembro({ nombre: '', cargo: '', años: 0 }); //se vacian los campos
+        setNuevoMiembro({ nombre: '', cargo: '', años: 0 });
       }
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
-// Handlers para los botones - UI
   const handleEditarMiembro = async () => {
     try {
-      if (editandoMiembro && editandoMiembro.id) {//si tenes los nuevos datos y el ID...
-        await editarMiembroEquipo(editandoMiembro.id, editandoMiembro);
+      if (editandoMiembro && editandoMiembro.id) {//verifica si se esta editando algo y si tiene id
+        await editarMiembroEquipo(editandoMiembro.id, editandoMiembro);//damos el id y el miembro actualizado
       }
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
-  // Handlers para los botones - UI
   const handleAgregarLogro = async () => {
     try {
       if (nuevoLogro.año && nuevoLogro.descripcion) {
         await agregarLogro(nuevoLogro);
         setModalLogroVisible(false);
-        setNuevoLogro({ año: '', descripcion: '' });//se vacian los campos
+        setNuevoLogro({ año: '', descripcion: '' });
       }
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
-  // Handlers para los botones - UI
   const handleEditarLogro = async () => {
     try {
-      if (editandoLogro && editandoLogro.id) {//si tenes los nuevos datos y el ID...
+      if (editandoLogro && editandoLogro.id) {
         await editarLogro(editandoLogro.id, editandoLogro);
       }
     } catch (error) {
@@ -299,118 +165,9 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
     }
   };
 
-  // Handlers para los botones - UI
-  const handleAgregarProyecto = async () => {
-    try {
-      if (nuevoProyecto.titulo && nuevoProyecto.descripcion) {
-        await agregarProyecto(nuevoProyecto);
-        setModalProyectoVisible(false);
-        setNuevoProyecto({ titulo: '', descripcion: '' });//se vacian los campos
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
+  
 
-  // Handlers para los botones - UI
-  const handleEditarProyecto = async () => {
-    try {
-      if (editandoProyecto && editandoProyecto.id) {//si tenes los nuevos datos y el ID...
-        await editarProyecto(editandoProyecto.id, editandoProyecto);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
-  // Handlers para los botones - UI
-  const handleAgregarCurso = async () => {
-    try {
-      if (nuevoCurso.titulo && nuevoCurso.descripcion) {
-        await agregarCurso(nuevoCurso);
-        setModalCursoVisible(false);
-        setNuevoCurso({//se vacian los campos
-          titulo: '',
-          duracion: '',
-          modalidad: '',
-          horario: '',
-          descripcion: ''
-        });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
-  const handleEditarCurso = async () => {
-    try {
-      if (editandoCurso && editandoCurso.id) {//si tenes los nuevos datos y el ID...
-        await editarCurso(editandoCurso.id, editandoCurso);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
-
-
-
-
-
-  // Función para cargar datos y actualizar la pantalla
-  const cargarDatos = async () => {
-    try {
-      // Cargar equipo ordenado por fecha de más nuevo a más viejo
-      //equipoQuery = almacena laconsulta a la colección de equipo
-      //query: función para crear una consulta
-      const equipoQuery = query(
-        collection(db, 'equipo'),
-        orderBy('createdAt', 'desc')  // Ordenar por fecha descendente
-      );
-      const equipoSnapshot = await getDocs(equipoQuery);//equipoSnapshot: contiene los datos de la consulta
-      const equipoData = equipoSnapshot.docs.map(doc => ({//map: recorro los documentos en equipoSnapshot
-        //equipoData: nueva estructura de datos para almacenar los datos de los documentos
-        id: doc.id,//en la estructura de datos se guarda el id de cada documento
-        ...doc.data()//en la estructura de datos se guardan los datos de cada documento
-      } as unknown as Miembro));//as unknown as Miembro: convierte el tipo de dato a Miembro
-      setEquipo(equipoData);
-
-      // Cargar logros
-      /*se crea una consulta para obtener todos los documentos de la colección logros
-      se recorreran los documentos en logrosSnapshot y se crea una nueva estructura de datos
-      llamada logrosData*/
-      const logrosSnapshot = await getDocs(query(collection(db, 'logros')));
-      const logrosData = logrosSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()//datos de cada documento
-      } as unknown as Logro));//los datos se convierten a Logro
-      setLogros(logrosData);
-
-      // Cargar proyectos
-      const proyectosSnapshot = await getDocs(query(collection(db, 'proyectos')));
-      const proyectosData = proyectosSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as unknown as Proyecto));
-      setProyectos(proyectosData);
-
-      // Cargar cursos temporales
-     
-      const cursosSnapshot = await getDocs(query(collection(db, 'cursosTemporales')));
-      const cursosData = cursosSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as unknown as Curso));
-      setCursosTemporales(cursosData);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
-
-
-
-  // CARGAR DATOS AL INICIAR LA PANTALLA
+  // Cargar datos al iniciar la pantalla
   useEffect(() => {//se ejecuta automaticamente llamando a la función cargarDatos
     cargarDatos(); //obtiene los datos iniciales de la BD para mostrar algo en pantalla
   }, []);//solo se ejecuta una vez al iniciar la pantalla
@@ -445,7 +202,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
             <TextInput
               style={styles.input}
               placeholder="Cargo"
-              value={nuevoMiembro.cargo}//actualiza el valor del campo nombre
+              value={nuevoMiembro.cargo}
               onChangeText={(text) => setNuevoMiembro({...nuevoMiembro, cargo: text})}
             />
             
@@ -478,7 +235,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
       {/* Modal para Editar Miembro */}
       <Modal
-        animationType="slide"//tipo de animación deslizante
+        animationType="slide"
         transparent={true}
         visible={modalEditMiembroVisible}//control de visibilidad del modal segun el estado
         onRequestClose={() => setModalEditMiembroVisible(false)}//onRequestClose: función para cerrar el modal
@@ -534,9 +291,9 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
             {/* Modal para Agregar Logro */}
             <Modal
-        animationType="slide"//tipo de animación deslizante
+        animationType="slide"
         transparent={true}
-        visible={modalLogroVisible}//control de visibilidad del modal segun el estado
+        visible={modalLogroVisible}
         onRequestClose={() => setModalLogroVisible(false)}
       >
         <View style={styles.centeredView}>
@@ -554,7 +311,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
               style={styles.input}
               placeholder="Descripción"
               value={nuevoLogro.descripcion}
-              onChangeText={(text) => setNuevoLogro({...nuevoLogro, descripcion: text})}//actualiza el estado
+              onChangeText={(text) => setNuevoLogro({...nuevoLogro, descripcion: text})}
               multiline
             />
 
@@ -580,9 +337,9 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
       {/* Modal para Editar Logro */}
       <Modal
-        animationType="slide"//tipo de animación deslizante
+        animationType="slide"
         transparent={true}
-        visible={modalEditLogroVisible}//control de visibilidad del modal segun el estado
+        visible={modalEditLogroVisible}
         onRequestClose={() => setModalEditLogroVisible(false)}
       >
         <View style={styles.centeredView}>
@@ -592,15 +349,15 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
             <TextInput
               style={styles.input}
               placeholder="Año"
-              value={editandoLogro?.año || ''}//muestra el valor del campo
+              value={editandoLogro?.año || ''}//actualiza el valor del campo año
               onChangeText={(text) => setEditandoLogro(prev => prev ? {...prev, año: text} : null)}//actualiza el estado de editandoLogro
             />
             
             <TextInput
               style={styles.input}
               placeholder="Descripción"
-              value={editandoLogro?.descripcion || ''}//muestra el valor del campo
-              onChangeText={(text) => setEditandoLogro(prev => prev ? {...prev, descripcion: text} : null)}//verifica y actualiza
+              value={editandoLogro?.descripcion || ''}
+              onChangeText={(text) => setEditandoLogro(prev => prev ? {...prev, descripcion: text} : null)}
               multiline
             />
 
@@ -626,241 +383,11 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
         </View>
       </Modal>
 
-      {/* Modal para Agregar Proyecto */}
-      <Modal
-        animationType="slide"//tipo de animación deslizante
-        transparent={true}
-        visible={modalProyectoVisible}//control de visibilidad del modal segun el estado
-        onRequestClose={() => setModalProyectoVisible(false)}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Agregar Nuevo Proyecto</Text>
-            
-            <TextInput
-              style={styles.input}
-              placeholder="Título"
-              value={nuevoProyecto.titulo}
-              onChangeText={(text) => setNuevoProyecto({...nuevoProyecto, titulo: text})}
-            />
-            
-            <TextInput
-              style={styles.input}
-              placeholder="Descripción"
-              value={nuevoProyecto.descripcion}
-              onChangeText={(text) => setNuevoProyecto({...nuevoProyecto, descripcion: text})}
-              multiline
-            />
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.button, styles.buttonCancel]}
-                onPress={() => setModalProyectoVisible(false)}
-              >
-                <Text style={styles.textStyle}>Cancelar</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={[styles.button, styles.buttonConfirm]}
-                onPress={handleAgregarProyecto}
-              >
-                <Text style={styles.textStyle}>Guardar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Modal para Editar Proyecto */}
-      <Modal
-        animationType="slide"//tipo de animación deslizante
-        transparent={true}
-        visible={modalEditProyectoVisible}//control de visibilidad del modal segun el estado
-        onRequestClose={() => setModalEditProyectoVisible(false)}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Editar Proyecto</Text>
-            
-            <TextInput
-              style={styles.input}
-              placeholder="Título"
-              value={editandoProyecto?.titulo || ''}//muestra el valor del campo
-              onChangeText={(text) => setEditandoProyecto(prev => prev ? {...prev, titulo: text} : null)}//actualiza el campo
-            />
-            
-            <TextInput
-              style={styles.input}
-              placeholder="Descripción"
-              value={editandoProyecto?.descripcion || ''}//muestra el valor del campo
-              onChangeText={(text) => setEditandoProyecto(prev => prev ? {...prev, descripcion: text} : null)}//actualiza el campo
-              multiline
-            />
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.button, styles.buttonCancel]}
-                onPress={() => {
-                  setModalEditProyectoVisible(false);
-                  setEditandoProyecto(null);
-                }}
-              >
-                <Text style={styles.textStyle}>Cancelar</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={[styles.button, styles.buttonConfirm]}
-                onPress={handleEditarProyecto}
-              >
-                <Text style={styles.textStyle}>Guardar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-{/* Modal para Agregar Curso */}
-<Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalCursoVisible}//control de visibilidad del modal segun el estado
-        onRequestClose={() => setModalCursoVisible(false)}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Agregar Nuevo Curso</Text>
-            
-            <TextInput
-              style={styles.input}
-              placeholder="Título"
-              value={nuevoCurso.titulo}//valor actual del campo
-              onChangeText={(text) => setNuevoCurso({...nuevoCurso, titulo: text})}
-            />
-            
-            <TextInput
-              style={styles.input}
-              placeholder="Duración"
-              value={nuevoCurso.duracion}//valor actual del campo
-              onChangeText={(text) => setNuevoCurso({...nuevoCurso, duracion: text})}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Modalidad"
-              value={nuevoCurso.modalidad}//valor actual del campo
-              onChangeText={(text) => setNuevoCurso({...nuevoCurso, modalidad: text})}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Horario"
-              value={nuevoCurso.horario}//valor actual del campo
-              onChangeText={(text) => setNuevoCurso({...nuevoCurso, horario: text})}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Descripción"
-              value={nuevoCurso.descripcion}//valor actual del campo
-              onChangeText={(text) => setNuevoCurso({...nuevoCurso, descripcion: text})}
-              multiline
-            />
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.button, styles.buttonCancel]}
-                onPress={() => setModalCursoVisible(false)}
-              >
-                <Text style={styles.textStyle}>Cancelar</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={[styles.button, styles.buttonConfirm]}
-                onPress={handleAgregarCurso}
-              >
-                <Text style={styles.textStyle}>Guardar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Modal para Editar Curso */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalEditCursoVisible}//control de visibilidad del modal segun el estado
-        onRequestClose={() => setModalEditCursoVisible(false)}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Editar Curso</Text>
-            
-            <TextInput
-              style={styles.input}
-              placeholder="Título"
-              value={editandoCurso?.titulo || ''}//muestra el valor del campo
-              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, titulo: text} : null)}//actializa el campo
-            />
-            
-            <TextInput
-              style={styles.input}
-              placeholder="Duración"
-              value={editandoCurso?.duracion || ''}//muestra el valor del campo
-              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, duracion: text} : null)}//actializa el campo
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Modalidad"
-              value={editandoCurso?.modalidad || ''}//muestra el valor del campo
-              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, modalidad: text} : null)}//actializa el campo
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Horario"
-              value={editandoCurso?.horario || ''}//muestra el valor del campo
-              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, horario: text} : null)}//actializa el campo
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Descripción"
-              value={editandoCurso?.descripcion || ''}//muestra el valor del campo
-              onChangeText={(text) => setEditandoCurso(prev => prev ? {...prev, descripcion: text} : null)}//actializa el campo
-              multiline
-            />
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.button, styles.buttonCancel]}
-                onPress={() => {
-                  setModalEditCursoVisible(false);
-                  setEditandoCurso(null);
-                }}
-              >
-                <Text style={styles.textStyle}>Cancelar</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={[styles.button, styles.buttonConfirm]}
-                onPress={handleEditarCurso}
-              >
-                <Text style={styles.textStyle}>Guardar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
 
 
 
-
-
-      {/* BANNER PRINCIPAL */}
       <ScrollView style={styles.container}> {/* aplica un estilo definido en styles para el contenedor */}
-        
+        {/* Banner Principal */}
         <ImageBackground //componente para mostrar una imagen de fondo
           source={require('../app/img/edificio-escolar.png')} //ruta de la imagen
           style={styles.banner} //aplica los estilos definidos al contenedor con la imagen de fondo
@@ -874,7 +401,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
 
 
-        {/*seccion UI  Nuestro Equipo */}
+        {/* Nuestro Equipo */}
         <View style={styles.section}> {/* inicia el contenedor de la seccion */}
           <Text style={styles.sectionTitle}>Nuestro Equipo Directivo</Text> {/* titulo de la seccion */}
           <TouchableOpacity 
@@ -886,7 +413,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
           <ScrollView horizontal showsHorizontalScrollIndicator={false}> {/* scroll horizontal para mostrar los miembros */}
             {equipo.map((miembro, index) => ( //map para recorrer el array de miembros y genera tarjetas para cada miembro
               <View key={index} style={styles.equipoCard}> 
-                <Image source={require('../app/img/user.png')} style={styles.equipoFoto} /> {/* imagen del miembro del equipo */}
+                <Image source={require('../app/img/user.png')} style={styles.equipoFoto} /> {/* imagen del miembro */}
                 <Text style={styles.equipoNombre}>{miembro.nombre}</Text> {/* nombre del miembro */}
                 <Text style={styles.equipoCargo}>{miembro.cargo}</Text> {/* cargo del miembro */}
                 <Text style={styles.equipoAños}>{miembro.años} años en la institución</Text> {/* años en la institución */}
@@ -912,7 +439,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
           </ScrollView>
         </View>
 
-        {/* seccion UI Logros y Reconocimientos */}
+        {/* Logros y Reconocimientos */}
         <View style={styles.logrosSection}>
           <Text style={styles.sectionTitle}>Logros y Reconocimientos</Text>
           <TouchableOpacity 
@@ -945,86 +472,6 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
             </View>
           ))}
         </View>
-
-                {/* seccion UI Proyectos Actuales */}
-                <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Proyectos Actuales</Text>
-          <TouchableOpacity 
-            style={styles.adminButton}
-            onPress={() => setModalProyectoVisible(true)}
-          >
-            <Text style={styles.adminButtonText}>Agregar Proyecto</Text>
-          </TouchableOpacity>
-          {proyectos.map((proyecto, index) => (
-            <View key={index} style={styles.proyectoCard}>
-              <Text style={styles.proyectoTitle}>{proyecto.titulo}</Text>
-              <Text style={styles.proyectoDesc}>{proyecto.descripcion}</Text>
-              <View style={styles.cardButtons}>
-                <TouchableOpacity 
-                  style={styles.editButton}
-                  onPress={() => {
-                    setEditandoProyecto(proyecto);
-                    setModalEditProyectoVisible(true);
-                  }}
-                >
-                  <MaterialIcons name="edit" size={24} color="#2ecc71" />
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.deleteButton}
-                  onPress={() => eliminarProyecto(proyecto.id!)}
-                >
-                  <MaterialIcons name="delete" size={24} color="red" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
-        </View>
-
-        {/* seccion UI Cursos Temporales */}
-        <View style={styles.cursosSection}>
-          <Text style={styles.sectionTitle}>Cursos Temporales</Text>
-          <TouchableOpacity 
-            style={styles.adminButton}
-            onPress={() => setModalCursoVisible(true)}
-          >
-            <Text style={styles.adminButtonText}>Agregar Curso</Text>
-          </TouchableOpacity>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}> {/* scroll horizontal para mostrar los cursos - se oculta el indicador de desplazamiento*/}
-            {cursosTemporales.map((curso, index) => ( //map para recorrer el array de cursos y genera tarjetas para cada curso
-              <View key={index} style={styles.cursoCard}>
-                <View style={styles.cursoHeader}>
-                  <Text style={styles.cursoTitulo}>{curso.titulo}</Text>
-                  <View style={styles.modalidadBadge}>
-                    <Text style={styles.modalidadText}>{curso.modalidad}</Text>
-                  </View>
-                </View>
-                <Text style={styles.cursoDuracion}>Duración: {curso.duracion}</Text>
-                <Text style={styles.cursoHorario}>Horario: {curso.horario}</Text>
-                <Text style={styles.cursoDescripcion}>{curso.descripcion}</Text>
-                <View style={styles.cardButtons}>
-                  <TouchableOpacity 
-                    style={styles.editButton}
-                    onPress={() => {
-                      setEditandoCurso(curso);
-                      setModalEditCursoVisible(true);
-                    }}
-                  >
-                    <MaterialIcons name="edit" size={24} color="#2ecc71" />
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.deleteButton}
-                    onPress={() => eliminarCurso(curso.id!)}
-                  >
-                    <MaterialIcons name="delete" size={24} color="red" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
-
-
-
       </ScrollView>
     </>
   );

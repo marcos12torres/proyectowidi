@@ -1,29 +1,33 @@
 import { collection, query, getDocs, orderBy } from 'firebase/firestore';
-import { db } from '../app/auth/firebase';
+import { db } from '../../app/auth/firebase';
 
-interface ListHookResult {
-  listDocuments: (collectionName: string, orderByField?: string) => Promise<any[]>;
-}
-
-export const useList = (): ListHookResult => {
-  const listDocuments = async (collectionName: string, orderByField?: string): Promise<any[]> => {
+export const useList = () => {
+  const obtenerEquipo = async () => {
     try {
-      let q = query(collection(db, collectionName));
-      
-      if (orderByField) {
-        q = query(collection(db, collectionName), orderBy(orderByField, 'desc'));
-      }
-
+      const q = query(collection(db, 'equipo'), orderBy('createdAt', 'desc'));
       const snapshot = await getDocs(q);
       return snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
     } catch (error) {
-      console.error('Error al listar documentos:', error);
+      console.error('Error al listar equipo:', error);
       throw error;
     }
   };
 
-  return { listDocuments };
+  const obtenerLogros = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, 'logros'));
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Error al listar logros:', error);
+      throw error;
+    }
+  };
+
+  return { obtenerEquipo, obtenerLogros };
 };

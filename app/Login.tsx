@@ -26,7 +26,7 @@ const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
   const nav = useNavigation();
 
-  // Maneja el inicio de sesión con Google usando Popup
+
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, provider); // Para web

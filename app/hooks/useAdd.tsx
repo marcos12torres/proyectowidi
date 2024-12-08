@@ -1,23 +1,29 @@
 import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../app/auth/firebase';
+import { db } from '../auth/firebase';
 
-interface AddHookResult {
-  addDocument: (collectionName: string, data: any) => Promise<string>;
-}
-
-export const useAdd = (): AddHookResult => {
-  const addDocument = async (collectionName: string, data: any): Promise<string> => {
+export const useAdd = () => {
+  const agregarMiembroEquipo = async (miembro: any) => {
     try {
-      const docRef = await addDoc(collection(db, collectionName), {
-        ...data,
+      const docRef = await addDoc(collection(db, 'equipo'), {
+        ...miembro,
         createdAt: new Date().toISOString()
       });
       return docRef.id;
     } catch (error) {
-      console.error('Error al agregar documento:', error);
+      console.error('Error al agregar miembro:', error);
       throw error;
     }
   };
 
-  return { addDocument };
+  const agregarLogro = async (logro: any) => {
+    try {
+      const docRef = await addDoc(collection(db, 'logros'), logro);
+      return docRef.id;
+    } catch (error) {
+      console.error('Error al agregar logro:', error);
+      throw error;
+    }
+  };
+
+  return { agregarMiembroEquipo, agregarLogro };
 };
