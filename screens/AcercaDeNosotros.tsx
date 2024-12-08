@@ -88,6 +88,9 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
   });
 
 
+
+
+
   // Handlers para los botones - UI
   //handleAgregarMiembro: función para agregar un miembro al equipo cuando se presiona el botón de agregar
   //handle: maneja el evento
@@ -97,6 +100,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
         await agregarMiembroEquipo(nuevoMiembro);
         setModalMiembroVisible(false);
         setNuevoMiembro({ nombre: '', cargo: '', años: 0 });
+        await cargarDatos(); // Recargar datos después de agregar
       }
     } catch (error) {
       console.error('Error:', error);
@@ -105,8 +109,11 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
   const handleEditarMiembro = async () => {
     try {
-      if (editandoMiembro && editandoMiembro.id) {//verifica si se esta editando algo y si tiene id
-        await editarMiembroEquipo(editandoMiembro.id, editandoMiembro);//damos el id y el miembro actualizado
+      if (editandoMiembro && editandoMiembro.id) {
+        await editarMiembroEquipo(editandoMiembro.id, editandoMiembro);
+        setModalEditMiembroVisible(false);
+        setEditandoMiembro(null);
+        await cargarDatos(); // Recargar datos después de editar
       }
     } catch (error) {
       console.error('Error:', error);
@@ -119,6 +126,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
         await agregarLogro(nuevoLogro);
         setModalLogroVisible(false);
         setNuevoLogro({ año: '', descripcion: '' });
+        await cargarDatos(); // Recargar datos después de agregar
       }
     } catch (error) {
       console.error('Error:', error);
@@ -129,7 +137,28 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
     try {
       if (editandoLogro && editandoLogro.id) {
         await editarLogro(editandoLogro.id, editandoLogro);
+        setModalEditLogroVisible(false);
+        setEditandoLogro(null);
+        await cargarDatos(); // Recargar datos después de editar
       }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const handleEliminarMiembro = async (id: string) => {
+    try {
+      await eliminarMiembroEquipo(id);
+      await cargarDatos(); // Recargar datos después de eliminar
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const handleEliminarLogro = async (id: string) => {
+    try {
+      await eliminarLogro(id);
+      await cargarDatos(); // Recargar datos después de eliminar
     } catch (error) {
       console.error('Error:', error);
     }
@@ -399,7 +428,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
                   </TouchableOpacity>
                   <TouchableOpacity 
                     style={styles.deleteButton} //boton para eliminar
-                    onPress={() => eliminarMiembroEquipo(miembro.id!)} //funcion para eliminar
+                    onPress={() => handleEliminarMiembro(miembro.id!)} //funcion para eliminar
                   >
                     <MaterialIcons name="delete" size={24} color="red" /> {/* icono de eliminar */}
                   </TouchableOpacity>
@@ -434,7 +463,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.deleteButton}
-                  onPress={() => eliminarLogro(logro.id!)}
+                  onPress={() => handleEliminarLogro(logro.id!)}
                 >
                   <MaterialIcons name="delete" size={24} color="red" />
                 </TouchableOpacity>
@@ -564,34 +593,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     flex: 1,
   },
-  proyectoCard: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  proyectoTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  proyectoDesc: {
-    fontSize: 14,
-    color: '#666',
-    flex: 1,
-    marginHorizontal: 10,
-  },
 
 
-
-
-  contactText: {
-    fontSize: 16,
-    marginLeft: 10,
-    color: '#2c3e50',
-  },
   overlay: {
     width: '100%',
     height: '100%',
@@ -606,34 +609,8 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
 
-  cursosSection: {
-    padding: 20,
-    backgroundColor: '#f8f9fa',
-  },
-  cursoCard: {
-    width: 280,
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 15,
-    marginRight: 15,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  cursoHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  cursoTitulo: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    flex: 1,
-  },
+ 
+
   modalidadBadge: {
     backgroundColor: '#e3f2fd',
     paddingHorizontal: 10,
