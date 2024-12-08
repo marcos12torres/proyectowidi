@@ -1,6 +1,4 @@
 // Importaciones de React y componentes básicos de React Native
-//6: se importan  herramientas de Firebase Firestore
-//modales: ventanas emergentes
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Dimensions, TouchableOpacity, ImageBackground, Modal, TextInput } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -34,7 +32,7 @@ interface Logro {
 
 
 const AcercaDeNosotros = () => { //se crea el componente principal de la pantalla
-  // Estados principales
+  // Estados principales individuales
   const [equipo, setEquipo] = useState<Miembro[]>([]);
   const [logros, setLogros] = useState<Logro[]>([]);
 
