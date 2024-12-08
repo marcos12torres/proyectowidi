@@ -31,49 +31,31 @@ interface Logro {
   descripcion: string;
 }
 
-interface Proyecto {
-  id?: string;
-  titulo: string;
-  descripcion: string;
-}
-
-interface Curso {
-  id?: string;
-  titulo: string;
-  duracion: string;
-  modalidad: string;
-  horario: string;
-  descripcion: string;
-}
 
 
 const AcercaDeNosotros = () => { //se crea el componente principal de la pantalla
   // Estados principales
   const [equipo, setEquipo] = useState<Miembro[]>([]);
   const [logros, setLogros] = useState<Logro[]>([]);
-  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
-  const [cursosTemporales, setCursosTemporales] = useState<Curso[]>([]);
+
 
 
   // Estados para modales
   const [modalMiembroVisible, setModalMiembroVisible] = useState(false); //ventana oculta
   const [modalLogroVisible, setModalLogroVisible] = useState(false);
-  const [modalProyectoVisible, setModalProyectoVisible] = useState(false);
-  const [modalCursoVisible, setModalCursoVisible] = useState(false);
+
 
   // Estados para edición
   //editandoMiembro: se guarda los datos
   //setEditandoMiembro: actualiza el estado de editandoMiembro
   const [editandoMiembro, setEditandoMiembro] = useState<Miembro | null>(null);
   const [editandoLogro, setEditandoLogro] = useState<Logro | null>(null);
-  const [editandoProyecto, setEditandoProyecto] = useState<Proyecto | null>(null);
-  const [editandoCurso, setEditandoCurso] = useState<Curso | null>(null);
+
   
   // Estados para modales de edición
   const [modalEditMiembroVisible, setModalEditMiembroVisible] = useState(false);
   const [modalEditLogroVisible, setModalEditLogroVisible] = useState(false);
-  const [modalEditProyectoVisible, setModalEditProyectoVisible] = useState(false);
-  const [modalEditCursoVisible, setModalEditCursoVisible] = useState(false);
+
 
   // Hooks personalizados
   const { agregarMiembroEquipo, agregarLogro } = useAdd();
@@ -105,18 +87,6 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
     descripcion: ''
   });
 
-  const [nuevoProyecto, setNuevoProyecto] = useState<Proyecto>({
-    titulo: '',
-    descripcion: ''
-  });
-
-  const [nuevoCurso, setNuevoCurso] = useState<Curso>({
-    titulo: '',
-    duracion: '',
-    modalidad: '',
-    horario: '',
-    descripcion: ''
-  });
 
   // Handlers para los botones - UI
   //handleAgregarMiembro: función para agregar un miembro al equipo cuando se presiona el botón de agregar
@@ -670,26 +640,8 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 12,
   },
-  modalidadText: {
-    color: '#1976d2',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  cursoDuracion: {
-    fontSize: 14,
-    color: '#34495e',
-    marginBottom: 5,
-  },
-  cursoHorario: {
-    fontSize: 14,
-    color: '#34495e',
-    marginBottom: 10,
-  },
-  cursoDescripcion: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    marginBottom: 15,
-  },
+
+
   adminButton: {
     backgroundColor: '#2ecc71',
     padding: 12,
