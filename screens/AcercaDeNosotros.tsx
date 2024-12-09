@@ -61,10 +61,10 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
   const { editarMiembroEquipo, editarLogro } = useUpdate();
   const { obtenerEquipo, obtenerLogros } = useList();
 
-  const cargarDatos = async () => {
+  const cargarDatos = async () => { //defino la funcion como asincrona
     try {
-      const equipoData = await obtenerEquipo();
-      setEquipo(equipoData as Miembro[]);
+      const equipoData = await obtenerEquipo();//obtengo los datos de la bd y los guardo en equipoData
+      setEquipo(equipoData as Miembro[]);//actualizo el estado de equipo con los datos obtenidos
 
       const logrosData = await obtenerLogros();
       setLogros(logrosData as Logro[]);
@@ -107,7 +107,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
   const handleEditarMiembro = async () => {
     try {
-      if (editandoMiembro && editandoMiembro.id) {
+      if (editandoMiembro && editandoMiembro.id) {//exige datos actualizados y el ID
         await editarMiembroEquipo(editandoMiembro.id, editandoMiembro);
         setModalEditMiembroVisible(false);
         setEditandoMiembro(null);
@@ -146,7 +146,7 @@ const AcercaDeNosotros = () => { //se crea el componente principal de la pantall
 
   const handleEliminarMiembro = async (id: string) => {
     try {
-      await eliminarMiembroEquipo(id);
+      await eliminarMiembroEquipo(id);//elimina el miembro del equipo según el ID
       await cargarDatos(); // Recargar datos después de eliminar
     } catch (error) {
       console.error('Error:', error);
