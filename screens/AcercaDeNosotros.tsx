@@ -2,8 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Dimensions, TouchableOpacity, ImageBackground, Modal, TextInput } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { collection, addDoc, deleteDoc, doc, getFirestore, getDocs, query, updateDoc, orderBy } from 'firebase/firestore';
-import { app } from '../app/auth/firebase'; //importa la configuración inicial de Firebase con las credenciales
 import { useAdd } from '../app/hooks/useAdd';
 import { useDelete } from '../app/hooks/useDelete';
 import { useUpdate } from '../app/hooks/useUpdate';
@@ -11,7 +9,7 @@ import { useList } from '../app/hooks/useList';
 
 const { width } = Dimensions.get('window');
 //12: se obtiene la base de datos de Firestore - getFirestore(app): conecta las credenciales de Firebase con Firestore
-const db = getFirestore(app);//inicializa la conexión con Firestore
+
 
 //interface / contrato
 
