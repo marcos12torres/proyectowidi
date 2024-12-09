@@ -8,7 +8,6 @@ import { useUpdate } from '../app/hooks/useUpdate';
 import { useList } from '../app/hooks/useList';
 
 const { width } = Dimensions.get('window');
-//12: se obtiene la base de datos de Firestore - getFirestore(app): conecta las credenciales de Firebase con Firestore
 
 
 //interface / contrato
